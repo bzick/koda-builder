@@ -1,0 +1,17 @@
+{
+    "name": "koda/sandbox",
+    "description": "Koda sandbox",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ivan Shalganov",
+            "email": "a.cobest@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-0": { "Koda\\Sandbox": "src/Names.php" }
+    },
+    "require": {
+        "php": ">=5.4"
+    }
+}
