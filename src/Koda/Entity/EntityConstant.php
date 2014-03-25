@@ -7,9 +7,6 @@ class EntityConstant {
     public $type = 0;
     public $value;
     public $name;
-    /**
-     * @var EntityFile
-     */
     public $line;
 
     public function __construct($name, $value, $line) {

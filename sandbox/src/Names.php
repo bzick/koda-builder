@@ -11,7 +11,7 @@ const FLOAT_FIVE = 5.5;
 const STRING_FIVE = 'five';
 
 function simple_function() {
-
+    return true;
 }
 
 class Names {

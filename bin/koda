@@ -1,0 +1,16 @@
+<?php
+
+foreach(['../vendor/autolad.php', '../../../../autoload.php'] as $loader) {
+    if(file_exists($loader)) {
+        require_once $loader;
+        define('KODA_COMPOSER_LOADER', $loader);
+    }
+}
+
+if(!defined('KODA_COMPOSER_LOADER')) {
+    echo "Setup composer\n";
+    exit(1);
+}
+
+$koda = new Koda(getcwd());
+$koda->dispatch();

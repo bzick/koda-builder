@@ -470,7 +470,7 @@ class Tokenizer
     {
         $str = "";
         foreach ($this->getSnippet($before, $after) as $token) {
-            $str .= $token[1] . $token[2];
+            $str .= $token[2] . $token[1];
         }
         return trim(str_replace("\n", '↵', $str));
     }
@@ -561,6 +561,17 @@ class Tokenizer
         }
 
         throw new UnexpectedTokenException($this);
+    }
+
+    public function getScope() {
+        $p = $this->p;
+        $this->forwardToEndScope();
+        $str = "";
+        $slice = array_slice($this->tokens, $p + 1, $this->p - $p - 1);
+        foreach ($slice as $token) {
+            $str .= $token[2] . $token[1];
+        }
+        return $str;
     }
 
     public function forwardWhile($token1 /*, $token2, ...*/) {

@@ -35,7 +35,7 @@ class EntityFile {
         $aliases    = [];
         $tokens = new Tokenizer(FS::get($this->path));
         if($tokens->is(T_NAMESPACE)) {
-            $_ns = $this->_parseName($tokens->next());
+            $ns = $this->_parseName($tokens->next());
             if($tokens->is('{')) {
                 $tokens->skip();
                 $brackets++;
@@ -67,8 +67,10 @@ class EntityFile {
                 $tokens->forwardTo(';')->next();
             } elseif($tokens->is(T_FUNCTION)) {
                 $name = $tokens->next()->get(T_STRING);
-                $this->functions[$_ns.$name] = new EntityFunction($_ns.$name, $aliases, [$this, $tokens->getLine()]);
-                $tokens->forwardTo('{')->forwardToEndScope()->next();
+                $function = new EntityFunction($_ns.$name, $aliases, [$this, $tokens->getLine()]);
+                $function->setBody($tokens->forwardTo('{')->getScope());
+                $tokens->next();
+                $this->functions[$_ns.$name] = $function;
             } elseif($tokens->is(T_FINAL, T_ABSTRACT, T_INTERFACE, T_TRAIT, T_CLASS)) {
                 $tokens->forwardTo(T_STRING);
                 $name = $tokens->current();
