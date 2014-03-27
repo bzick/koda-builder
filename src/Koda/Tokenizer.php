@@ -155,16 +155,16 @@ class Tokenizer
     private function _valid($expects, $token)
     {
         foreach ($expects as $expect) {
-            if (is_string($expect) || $expect < 1000) {
+//            if (is_string($expect) || $expect < 1000) {
                 if ($expect === $token) {
                     return true;
                 }
-            } else {
-
-                if (isset(self::$macros[$expect][$token])) {
-                    return true;
-                }
-            }
+//            } else {
+//
+//                if (isset(self::$macros[$expect][$token])) {
+//                    return true;
+//                }
+//            }
         }
         return false;
     }

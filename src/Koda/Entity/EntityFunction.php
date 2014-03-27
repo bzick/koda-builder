@@ -57,6 +57,7 @@ class EntityFunction implements EntityInterface {
     public function __construct($name, $aliases, $line, $class = null) {
         $this->aliases = $aliases;
         $this->name = $name;
+        $this->short = $name;
         $this->line = $line;
         $this->class = $class;
     }
@@ -122,7 +123,7 @@ class EntityFunction implements EntityInterface {
                         case 'return':
                             if(preg_match('/^(.*?)\s*$/Sm', $param[1], $matches)) {
                                 $this->return["type"] = $matches[1];
-                                $this->return["desc"] = $matches[2];
+                                $this->return["desc"] = isset($matches[2]) ? $matches[2] : '';
                             }
                             break;
                         default:
@@ -166,28 +167,8 @@ class EntityFunction implements EntityInterface {
             } elseif(isset($doc_params[ $param->name ])) {
                 $_type = $doc_params[ $param->name ]["type"];
                 if(strpos($_type, "|")) { // multiple types
-                    throw new \LogicException("Multiple types unsupported yet");
-//                    foreach(explode("|", $_type) as $type) {
-//                        $type = trim($type);
-//                        if(strpos($_type, "[]")) {
-//                            $type = trim($type, '[]');
-//                            $arg["multiple"] = true;
-//                        }
-//                        if(isset(self::$_aliases[ $type ])) {
-//                            $type = self::$_aliases[ $type ];
-//                        } elseif($_type === "mixed") {
-//                            $arg["type"] = null;
-//                            continue;
-//                        }
-//                        if(isset(self::$_native[$type])) {
-//                            $arg["type"][ $type ] = self::$_native[$type];
-//                        } else {
-//                            $arg["type"]["object"] = 1;
-//                            $arg["type"]["class"][] = $type;
-//                        }
-//
-//                    }
-//                    arsort($arg["type"]); // sort by types (@see self::$_native)
+                    $this->strict = false;
+                    $argument->type = null;
                 } elseif($_type === "mixed") {
                     $this->strict = false;
                     $argument->type = null;
@@ -218,7 +199,7 @@ class EntityFunction implements EntityInterface {
         foreach($this->arguments as $arg) {
             $args[] = $arg->dump();
         }
-        return static::$entity_type." {$this->name} ( ".($args ? implode(', ', $args) : '').' )';
+        return static::$entity_type." {$this->name}(".($args ? implode(', ', $args) : '').'):'.($this->return ? $this->return['type'] : 'void');
     }
 
     public function __toString() {

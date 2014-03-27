@@ -29,25 +29,27 @@ class EntityClass implements EntityInterface {
     public $name;
     public $short;
     public $ns;
+    public $ref;
 
-    public function __construct($class, array $line) {
-        $this->short = $class;
-        $this->name = "";
-        $this->ns   = "";
-        $this->line = $line;
+    public function __construct($class, $aliases, array $line) {
+        $ref           = new \ReflectionClass($class);
+        $this->short   = $ref->getShortName();
+        $this->ns      = $ref->getNamespaceName();
+        $this->aliases = $aliases;
+        $this->name    = $class;
+        $this->line    = $line;
     }
 
     public function setAliases($aliases) {
         $this->aliases = $aliases;
     }
 
-    public function addConstant($name, $value) {
-        $this->constants[$name] = $value;
-        return $this;
+    public function addConstant($name, $line) {
+        return $this->constants[$name] = new EntityConstant($this->name.'::'.$name, constant($this->name.'::'.$name), $line, $this);
     }
 
-    public function addProperty($type, $name, $value) {
-
+    public function addProperty($name, $line) {
+        return $this->properties[$name] = new EntityProperty($name, $line, $this);
     }
 
     /**
@@ -56,7 +58,7 @@ class EntityClass implements EntityInterface {
      * @return EntityMethod
      */
     public function addMethod($name, $line) {
-        $method = new EntityMethod($name, $this->aliases, $line, $this);
+        $method = new EntityMethod($this->name.'::'.$name, $this->aliases, $line, $this);
         $this->methods[$name] = $method;
         return $method;
     }
@@ -85,17 +87,16 @@ class EntityClass implements EntityInterface {
         }
         $functions = [];
         foreach($this->methods as $method) {
-            $method[] = $method->dump($tab.'    ');
+            $functions[] = $method->dump($tab.'    ');
         }
         $properties = [];
         foreach($this->properties as $property) {
             $properties[] = $property->dump($tab.'    ');
         }
-        var_dump($constants, $properties, $functions);
         return "class {$this->name} {".
-        "\n$tab    ".implode("\n$tab    ", $constants)."\n".
-        "\n$tab    ".implode("\n$tab    ", $properties)."\n".
-        "\n$tab    ".implode("\n$tab    ", $functions)."\n".
+        ($constants  ? "\n$tab    ".implode("\n$tab    ", $constants)."\n" : "").
+        ($properties ? "\n$tab    ".implode("\n$tab    ", $properties)."\n": "").
+        ($functions  ? "\n$tab    ".implode("\n$tab    ", $functions)."\n" : "").
         "\n{$tab}}";
     }
 }

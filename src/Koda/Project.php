@@ -11,6 +11,7 @@ use Symfony\Component\Finder\Finder;
 class Project implements EntityInterface {
 
     public $name;
+    public $code;
 
     public $version = '0.0';
 
@@ -51,7 +52,21 @@ class Project implements EntityInterface {
         require_once $path.'/vendor/autoload.php';
         $project = new self();
         $project->name = $composer["name"];
+        list($vendor, $name) = explode("/", $project->name);
+        if($vendor == $name) {
+            $project->code = ucfirst($name);
+        } else {
+            $project->code = ucfirst($vendor).ucfirst($name);
+        }
         $project->description = $composer["description"];
+        if(isset($composer["config"]["koda"]["version"])) {
+            $ver = $composer["config"]["koda"]["version"];
+            if(is_callable($ver)) {
+                $project->version = call_user_func($ver);
+            } else {
+                $project->version = exec($ver);
+            }
+        }
         $paths = [];
         foreach($composer["autoload"] as $loader) {
             $paths = array_merge($paths, array_values($loader));
@@ -124,18 +139,24 @@ class Project implements EntityInterface {
     public function dump($tab = "") {
         $constants = [];
         foreach($this->constants as $const) {
-            $constants[] = $const->dump($tab.'    ');
+            if(!$const->class) {
+                $constants[] = $const->dump($tab.'    ');
+            }
         }
         $functions = [];
-        foreach($this->functions as $function) {
-            $functions[] = $function->dump($tab.'    ');
+        foreach($this->callable as $function) {
+            if(!$function->class) {
+                $functions[] = $function->dump($tab.'    ');
+            }
         }
 
         $classes = [];
         foreach($this->classes as $class) {
             $classes[] = $class->dump($tab.'    ');
         }
-        return "Project {$this->name} (v{$this->version}) {".
+        return "Project {$this->name} {".
+            "\n$tab    version {$this->version}".
+            "\n$tab    code {$this->code}\n".
             "\n$tab    ".implode("\n$tab    ", $constants)."\n".
             "\n$tab    ".implode("\n$tab    ", $functions)."\n".
             "\n$tab    ".implode("\n$tab    ", $classes)."\n".

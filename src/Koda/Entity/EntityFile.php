@@ -70,14 +70,20 @@ class EntityFile {
                 $function = new EntityFunction($_ns.$name, $aliases, [$this, $tokens->getLine()]);
                 $function->setBody($tokens->forwardTo('{')->getScope())->scan();
                 $tokens->next();
-                $this->functions[$_ns.$name] = $function;
+                $this->functions[$function->name] = $function;
             } elseif($tokens->is(T_FINAL, T_ABSTRACT, T_INTERFACE, T_TRAIT, T_CLASS)) {
                 $tokens->forwardTo(T_STRING);
                 $name = $tokens->current();
                 $class = new EntityClass($_ns.$name, $aliases, [$this, $tokens->getLine()]);
-                $tokens->forwardTo('{');
-                while($tokens->forwardTo(T_FUNCTION, '{', '}') && $tokens->valid()) {
+                $tokens->forwardTo('{')->next();
+                while($tokens->forwardTo(T_CONST, T_FUNCTION, '{', '}', T_VARIABLE) && $tokens->valid()) {
                     switch($tokens->key()) {
+                        case T_CONST:
+                            $class->addConstant($tokens->next()->get(T_STRING), [$this, $tokens->getLine()]);
+                            break;
+                        case T_VARIABLE:
+                            $class->addProperty(ltrim($tokens->getAndNext(), '$'), [$this, $tokens->getLine()]);
+                            break;
                         case T_FUNCTION:
                             $method_name = $tokens->next()->get(T_STRING);
                             $method_line = $tokens->getLine();
@@ -90,12 +96,12 @@ class EntityFile {
                             $tokens->forwardTo('}')->next();
                             break;
                         case '}':   // end of class
+                            $tokens->next();
+                            $this->classes[$class->name] = $class;
                             break 3;
 
                     }
                 }
-                $tokens->forwardToEndScope()->next();
-                $this->classes[$_ns.$name] = $class;
             } else {
                 break;
             }

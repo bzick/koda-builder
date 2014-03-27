@@ -10,11 +10,25 @@ const FIVE = 5;
 const FLOAT_FIVE = 5.5;
 const STRING_FIVE = 'five';
 
+/**
+ * @param float $x
+ * @param int $y
+ * @return bool
+ */
 function simple_function($x, $y = 5) {
     return true;
 }
 
 class Names {
+
+
+    const FIVE = 5;
+    const FLOAT_FIVE = 5.5;
+    const STRING_FIVE = 'five';
+
+    public $five = 5;
+    protected $float_five = 5.5;
+    private $string_five = 'five';
 
     public static function publicStatic() {
 

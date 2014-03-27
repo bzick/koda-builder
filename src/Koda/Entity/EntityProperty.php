@@ -20,10 +20,34 @@ class EntityProperty implements EntityInterface {
      * @var string
      */
     public $name;
-    public $type = Flags::IS_PUBLIC;
+    public $value;
+    public $type = Types::NIL;
+    public $flags = 0;
+
+    public function __construct($name, $line, $class) {
+        $this->class = $class;
+        $this->name = $name;
+        $property = new \ReflectionProperty($this->class->name, $name);
+        if($property->isPrivate()) {
+            $this->flags |= Flags::IS_PRIVATE;
+        } elseif($property->isProtected()) {
+            $this->flags |= Flags::IS_PROTECTED;
+        } else {
+            $this->flags |= Flags::IS_PUBLIC;
+        }
+
+        if($property->isStatic()) {
+            $this->flags |= Flags::IS_STATIC;
+        }
+
+        if($property->isDefault()) {
+            $this->value = $property->getDeclaringClass()->getDefaultProperties()[$name];
+            $this->type  = Types::getType($this->value);
+        }
+    }
 
     public function dump($tab = "") {
-        return Flags::keyword($this->type).' '.$this->class->name.'::$'.$this->name;
+        return 'prop '.$this->class->name.'::$'.$this->name.'  ['.Flags::keyword($this->flags).']';
     }
 
     public function __toString() {

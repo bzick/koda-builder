@@ -13,5 +13,10 @@
     },
     "require": {
         "php": ">=5.4"
-    }
+    },
+	"config": {
+		"koda": {
+			"version": "echo '0.3'"
+		}
+	}
 }
