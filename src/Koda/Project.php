@@ -1,13 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: bzick
- * Date: 16.03.14
- * Time: 1:51
- */
 
 namespace Koda;
-
 
 use Koda\Entity\EntityClass;
 use Koda\Entity\EntityConstant;
@@ -15,11 +8,11 @@ use Koda\Entity\EntityFile;
 use Koda\Entity\EntityFunction;
 use Symfony\Component\Finder\Finder;
 
-class Project {
+class Project implements EntityInterface {
 
     public $name;
 
-    public $version = 0.0;
+    public $version = '0.0';
 
     public $description;
 
@@ -32,6 +25,11 @@ class Project {
      * @var EntityFunction[]
      */
     public $functions = [];
+
+    /**
+     * @var EntityFunction[]
+     */
+    public $callable = [];
 
     /**
      * @var EntityClass[]
@@ -94,14 +92,14 @@ class Project {
             foreach($file->classes as $class) {
                 /* @var EntityClass $class */
                 if(isset($this->classes[$class->name])) {
-                    throw new \LogicException("Class {$class->name} already loaded form ".$this->classes[$class->name]->line." (try to define in {$class->line})");
+                    throw new \LogicException("Class {$class->name} already defined in ".$this->classes[$class->name]->line." (try to define in {$class->line})");
                 } else {
                     $this->classes[$class->name] = $class;
                     foreach($class->constants as $constant) {
                         $this->constants[$constant->name] = $constant;
                     }
                     foreach($class->methods as $method) {
-                        $this->functions[$method->name] = $method;
+                        $this->callable[$method->name] = $method;
                     }
                 }
             }
@@ -117,8 +115,34 @@ class Project {
                     throw new \LogicException("Function {$function->name} already defined in ".$this->functions[$function->name]->line." (try to define in {$function->line})");
                 } else {
                     $this->functions[$function->name] = $function;
+                    $this->callable[$function->name] = $function;
                 }
             }
         }
     }
-} 
+
+    public function dump($tab = "") {
+        $constants = [];
+        foreach($this->constants as $const) {
+            $constants[] = $const->dump($tab.'    ');
+        }
+        $functions = [];
+        foreach($this->functions as $function) {
+            $functions[] = $function->dump($tab.'    ');
+        }
+
+        $classes = [];
+        foreach($this->classes as $class) {
+            $classes[] = $class->dump($tab.'    ');
+        }
+        return "Project {$this->name} (v{$this->version}) {".
+            "\n$tab    ".implode("\n$tab    ", $constants)."\n".
+            "\n$tab    ".implode("\n$tab    ", $functions)."\n".
+            "\n$tab    ".implode("\n$tab    ", $classes)."\n".
+        "\n{$tab}}";
+    }
+
+    public function __toString() {
+        return 'Project '.$this->name;
+    }
+}

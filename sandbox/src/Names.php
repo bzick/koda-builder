@@ -10,7 +10,7 @@ const FIVE = 5;
 const FLOAT_FIVE = 5.5;
 const STRING_FIVE = 'five';
 
-function simple_function() {
+function simple_function($x, $y = 5) {
     return true;
 }
 

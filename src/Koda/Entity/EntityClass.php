@@ -3,21 +3,25 @@
 namespace Koda\Entity;
 
 
-class EntityClass {
-    const IS_CLASS     = 1;
-    const IS_INTERFACE = 2;
-    const IS_TRAIT     = 4;
+use Koda\EntityInterface;
 
-    const IS_ABSTRACT = 64;
-    const IS_FINAL    = 128;
-
+class EntityClass implements EntityInterface {
     public $extends;
     public $implements = [];
     public $traits = [];
 
-    public $flags = self::IS_CLASS;
-    public $props = [];
+    public $flags = 0;
+    /**
+     * @var EntityProperty[]
+     */
+    public $properties = [];
+    /**
+     * @var EntityFunction[]
+     */
     public $methods = [];
+    /**
+     * @var EntityConstant[]
+     */
     public $constants = [];
 
     public $aliases;
@@ -46,8 +50,15 @@ class EntityClass {
 
     }
 
-    public function addMethod($name, $args, $body, $meta) {
-
+    /**
+     * @param string $name method name (without class name)
+     * @param array $line
+     * @return EntityMethod
+     */
+    public function addMethod($name, $line) {
+        $method = new EntityMethod($name, $this->aliases, $line, $this);
+        $this->methods[$name] = $method;
+        return $method;
     }
 
     public function setConstructor($body) {
@@ -60,10 +71,31 @@ class EntityClass {
 
 
     public function __toString() {
-        return $this->name;
+        return "class {$this->name}";
     }
 
     public function scan() {
 
     }
-} 
+
+    public function dump($tab = "") {
+        $constants = [];
+        foreach($this->constants as $const) {
+            $constants[] = $const->dump($tab.'    ');
+        }
+        $functions = [];
+        foreach($this->methods as $method) {
+            $method[] = $method->dump($tab.'    ');
+        }
+        $properties = [];
+        foreach($this->properties as $property) {
+            $properties[] = $property->dump($tab.'    ');
+        }
+        var_dump($constants, $properties, $functions);
+        return "class {$this->name} {".
+        "\n$tab    ".implode("\n$tab    ", $constants)."\n".
+        "\n$tab    ".implode("\n$tab    ", $properties)."\n".
+        "\n$tab    ".implode("\n$tab    ", $functions)."\n".
+        "\n{$tab}}";
+    }
+}

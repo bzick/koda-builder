@@ -34,6 +34,8 @@ Help:  $file -h|--help\n";
 
         $project->scan();
 
+
+        \Koda\Dumper::dump($project);
     }
 
     /**

@@ -3,16 +3,13 @@
 namespace Koda\Entity;
 
 
+use Koda\EntityInterface;
 use PhpParser\Lexer;
 use PhpParser\Parser;
 
-class EntityFunction {
+class EntityFunction implements EntityInterface {
 
-    private static $_aliases = [
-        "integer" => "int",
-        "str" => "string",
-        "double" => "float"
-    ];
+    protected static $entity_type = "function";
 
     /**
      * @var array of native types with priorities
@@ -40,7 +37,14 @@ class EntityFunction {
     public $line;
     public $aliases;
     public $body;
-    public $arguments;
+    /**
+     * @var EntityClass
+     */
+    public $class = null;
+    /**
+     * @var EntityArgument[]
+     */
+    public $arguments = [];
     public $statics;
     public $stmts;
 
@@ -48,96 +52,101 @@ class EntityFunction {
      * @param $name
      * @param $aliases
      * @param $line
+     * @param EntityClass $class
      */
-    public function __construct($name, $aliases, $line) {
+    public function __construct($name, $aliases, $line, $class = null) {
         $this->aliases = $aliases;
         $this->name = $name;
         $this->line = $line;
-        $func = new \ReflectionFunction($name);
-        $this->short = $func->getShortName();
-        $this->ns = $func->getNamespaceName();
+        $this->class = $class;
     }
 
     /**
      * @param string $body
+     * @return $this
      */
     public function setBody($body) {
         $this->body = $body;
         $parser = new Parser(new Lexer);
         $this->stmts = $parser->parse('<?php'.$this->body);
+        return $this;
     }
 
 
     /**
      *
-     * @param \ReflectionMethod $method
-     * @return array
+     * @throws \LogicException
+     * @return \ReflectionFunctionAbstract
      */
-    public  function scan(\ReflectionMethod $method) {
-        $info = array(
-            "desc" => "",
-            "args" => null,
-            "files" => false,
-            "return" => null,
-            "options" => array(),
-            "method" => $method->class."::".$method->name
-        );
-        $doc = $method->getDocComment();
-        $doc_params = array();
+    public function scan() {
+        $func        = new \ReflectionFunction($this->name);
+        $this->short = $func->getShortName();
+        $this->ns    = $func->getNamespaceName();
+        $doc         = $func->getDocComment();
+        $params      = [];
 
         if($doc) {
-            $doc = preg_replace('/^\s*(\*\s*)+/mS', '', trim($doc, "*/ \t\n\r"));
-            if(strpos($doc, "@") !== false) {
-                $doc = explode("@", $doc, 2);
-                if($doc[0] = trim($doc[0])) {
-                    $this->description = $doc[0];
-                }
-                if($doc[1]) {
-                    foreach(preg_split('/\r?\n@/mS', $doc[1]) as $param) {
-                        $param = preg_split('/\s+/', $param, 2);
-                        if(!isset($param[1])) {
-                            $param[1] = "";
-                        }
-                        switch(strtolower($param[0])) {
-                            case 'description':
-                                if(empty($info["desc"])) {
-                                    $this->description = $param[1];
-                                }
-                                break;
-                            case 'param':
-                                if(preg_match('/^(.*?)\s*\$(\w+)\s*?/mS', $param[1], $matches)) {
-                                    $doc_params[ $matches[2] ] = array(
-                                        "type" => $matches[1],
-                                        "desc" => trim(substr($param[1], strlen($matches[0])))
-                                    );
+            $params = $this->_parseDocBlock($doc);
+        }
+        $this->_parseParams($func->getParameters(), $params);
+    }
 
+    protected function _parseDocBlock($doc) {
+        $doc = preg_replace('/^\s*(\*\s*)+/mS', '', trim($doc, "*/ \t\n\r"));
+        $params = [];
+        if(strpos($doc, "@") !== false) {
+            $doc = explode("@", $doc, 2);
+            if($doc[0] = trim($doc[0])) {
+                $this->description = $doc[0];
+            }
+            if($doc[1]) {
+                foreach(preg_split('/\r?\n@/Sm', $doc[1]) as $param) {
+                    $param = preg_split('/\s+/', $param, 2);
+                    if(!isset($param[1])) {
+                        $param[1] = "";
+                    }
+                    switch(strtolower($param[0])) {
+                        case 'description':
+                            if(empty($info["desc"])) {
+                                $this->description = $param[1];
+                            }
+                            break;
+                        case 'param':
+                            if(preg_match('/^(.*?)\s*\$(\w+)\s*?/Sm', $param[1], $matches)) {
+                                $params[ $matches[2] ] = array(
+                                    "type" => $matches[1],
+                                    "desc" => trim(substr($param[1], strlen($matches[0])))
+                                );
+                            }
+                            break;
+                        case 'return':
+                            if(preg_match('/^(.*?)\s*$/Sm', $param[1], $matches)) {
+                                $this->return["type"] = $matches[1];
+                                $this->return["desc"] = $matches[2];
+                            }
+                            break;
+                        default:
+                            if(isset($this->options[ $param[0] ])) {
+                                if(!is_array($this->options[ $param[0] ])) {
+                                    $this->options[ $param[0] ] = array($this->options[ $param[0] ]);
                                 }
-                                break;
-                            case 'return':
-                                if(preg_match('/^(.*?)\s*$/m', $param[1], $matches)) {
-                                    $this->return["type"] = $matches[1];
-                                    $this->return["desc"] = $matches[2];
-                                }
-                                break;
-                            default:
-                                if(isset($this->options[ $param[0] ])) {
-                                    if(!is_array($info["options"][ $param[0] ])) {
-                                        $this->options[ $param[0] ] = array($info["options"][ $param[0] ]);
-                                    }
-                                    $this->options[ $param[0] ][] = $param[1];
-                                } else {
-                                    $this->options[ $param[0] ] = $param[1];
-                                }
-                        }
+                                $this->options[ $param[0] ][] = $param[1];
+                            } else {
+                                $this->options[ $param[0] ] = $param[1];
+                            }
                     }
                 }
-            } else {
-                $info["desc"] = $doc;
             }
-
+        } else {
+            $info["desc"] = $doc;
         }
-        $args = array();
-        foreach($method->getParameters() as $param) {
+
+        return $params;
+    }
+
+    public function _parseParams($params, $doc_params) {
+        /* @var \ReflectionParameter[] $params */
+        foreach($params as $param) {
             $argument = new EntityArgument($this, $param->name);
             if(isset($doc_params[ $param->name ])) {
                 $argument->description = $doc_params[ $param->name ];
@@ -181,29 +190,38 @@ class EntityFunction {
 //                    arsort($arg["type"]); // sort by types (@see self::$_native)
                 } elseif($_type === "mixed") {
                     $this->strict = false;
-                    $this->type = null;
+                    $argument->type = null;
                 } else {
                     if(strpos($_type, "[]")) {
                         $this->strict = false;
-                        $this->type = 'array';
-                        $this->hint = rtrim($_type, '[]');
+                        $argument->type = 'array';
+                        $argument->hint = rtrim($_type, '[]');
                     }
                     if(isset(self::$_native[$_type])) {
-                        $this->type = $_type;
+                        $argument->type = $_type;
                     } else {
                         $_type = ltrim($_type,'\\');
-                        $this->type = "object";
-                        $this->instance_of =  $_type;
+                        $argument->type = "object";
+                        $argument->instance_of =  $_type;
                     }
                 }
             } else {
-                $this->log(LOG_WARNING, 'Undocumented argument $'.$argument->name.' in '.$this->name.' [error.method.arg.undocumented]');
+//                $this->log(LOG_WARNING, 'Undocumented argument $'.$argument->name.' in '.$this->name.' [error.method.arg.undocumented]');
                 $this->strict = false;
             }
             $this->arguments[$argument->name] = $argument;
-            $args[ $param->name ] = $arg;
         }
-        $info["args"] = $args;
-        return $info;
     }
-} 
+
+    public function dump($tab = "") {
+        $args = [];
+        foreach($this->arguments as $arg) {
+            $args[] = $arg->dump();
+        }
+        return static::$entity_type." {$this->name} ( ".($args ? implode(', ', $args) : '').' )';
+    }
+
+    public function __toString() {
+        return 'function '.$this->name.'('.($this->arguments ? '...' : '').')';
+    }
+}

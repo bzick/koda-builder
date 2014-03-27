@@ -68,14 +68,34 @@ class EntityFile {
             } elseif($tokens->is(T_FUNCTION)) {
                 $name = $tokens->next()->get(T_STRING);
                 $function = new EntityFunction($_ns.$name, $aliases, [$this, $tokens->getLine()]);
-                $function->setBody($tokens->forwardTo('{')->getScope());
+                $function->setBody($tokens->forwardTo('{')->getScope())->scan();
                 $tokens->next();
                 $this->functions[$_ns.$name] = $function;
             } elseif($tokens->is(T_FINAL, T_ABSTRACT, T_INTERFACE, T_TRAIT, T_CLASS)) {
                 $tokens->forwardTo(T_STRING);
                 $name = $tokens->current();
-                $this->classes[$_ns.$name] = new EntityClass($_ns.$name, $aliases, [$this, $tokens->getLine()]);
-                $tokens->forwardTo('{')->forwardToEndScope()->next();
+                $class = new EntityClass($_ns.$name, $aliases, [$this, $tokens->getLine()]);
+                $tokens->forwardTo('{');
+                while($tokens->forwardTo(T_FUNCTION, '{', '}') && $tokens->valid()) {
+                    switch($tokens->key()) {
+                        case T_FUNCTION:
+                            $method_name = $tokens->next()->get(T_STRING);
+                            $method_line = $tokens->getLine();
+                            $method_body = $tokens->forwardTo('{')->getScope();
+                            $method = $class->addMethod($method_name, [$this, $method_line]);
+                            $method->setBody($method_body)->scan();
+                            $tokens->next();
+                            break;
+                        case '{':   // use traits scope
+                            $tokens->forwardTo('}')->next();
+                            break;
+                        case '}':   // end of class
+                            break 3;
+
+                    }
+                }
+                $tokens->forwardToEndScope()->next();
+                $this->classes[$_ns.$name] = $class;
             } else {
                 break;
             }

@@ -20,7 +20,7 @@ class Extension {
         $ALIAS = strtoupper($this->alias);
         ob_start();
         ?>
-dnl Toxen compiler, <?=date("Y-m-d H:i:s")?>.
+dnl Koda, <?=date("Y-m-d H:i:s")?>.
 
 PHP_ARG_WITH(<?=$this->alias?>, for <?=$this->alias?> support,
 [  --with-<?=$this->alias?>             Include <?=$this->alias?> support])

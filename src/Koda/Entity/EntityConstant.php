@@ -2,7 +2,9 @@
 namespace Koda\Entity;
 
 
-class EntityConstant {
+use Koda\EntityInterface;
+
+class EntityConstant implements EntityInterface {
 
     public $type = 0;
     public $value;
@@ -18,5 +20,13 @@ class EntityConstant {
         }
         $this->value = $value;
         $this->line = $line;
+    }
+
+    public function dump($tab = "") {
+        return "const {$this->name} = {$this->value}";
+    }
+
+    public function __toString() {
+        return "const {$this->name}";
     }
 }
