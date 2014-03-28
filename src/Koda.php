@@ -1,17 +1,20 @@
 <?php
-use Koda\Dumper;
+use Koda\ToolKit;
 
 class Koda {
+    const VERSION_STRING = "0.1";
     public $config = [];
-    public $root = __DIR__;
+    public $root;
+    public $resources_dir;
 
     /**
-     * @param null $root
+     * @param string $root
      * @throws LogicException
      * @internal param string $config_path
      */
     public function __construct($root = null) {
         $this->root = $root;
+        $this->resources_dir = __DIR__.'/../resources';
     }
 
     /**
@@ -35,19 +38,21 @@ Help:  $file -h|--help\n";
 
         $project->scan();
 
-
-        dump($project);
+        $compiler = new Koda\Compiler\ZendEngine();
+        $compiler->setBuildDir($this->root.'/build');
+        $compiler->setResourcesDir($this->resources_dir);
+        $compiler->process($project);
     }
 
 }
 
 function dump($item) {
-    echo Dumper::dump($item)."\n";
+    echo ToolKit::dump($item)."\n";
     echo (new Exception())->getTraceAsString()."\n";
 }
 
 function drop($item) {
-    echo Dumper::dump($item)."\n";
+    echo ToolKit::dump($item)."\n";
     echo (new Exception())->getTraceAsString()."\n";
     exit;
 }

@@ -1,0 +1,13 @@
+Project koda/sandbox {
+    version 0.3
+    alias KodaSandbox
+
+    const Koda\Sandbox\FIVE = 5
+    const Koda\Sandbox\FLOAT_FIVE = 5.5
+    const Koda\Sandbox\STRING_FIVE = 'five'
+
+    function Koda\Sandbox\simple_function(float $x, int $y = 5):bool
+
+    
+
+}

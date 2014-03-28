@@ -30,8 +30,9 @@ class EntityFunction implements EntityInterface {
     public $description;
     public $return;
     public $options;
-    public $ref       = false;
+    public $is_ref    = false;
     public $generator = false;
+    public $required  = 0;
     public $short;
     public $ns;
     public $line;
@@ -73,6 +74,9 @@ class EntityFunction implements EntityInterface {
         return $this;
     }
 
+    public function isReturnRef() {
+        return intval($this->is_ref);
+    }
 
     /**
      *
@@ -153,8 +157,12 @@ class EntityFunction implements EntityInterface {
                 $argument->description = $doc_params[ $param->name ];
             }
             $argument->is_optional = $param->isOptional();
+            if(!$argument->is_optional) {
+                $this->required++;
+            }
             $argument->default_value = $param->isDefaultValueAvailable() ? $param->getDefaultValue() : null;
             $argument->position = $param->getPosition();
+            $argument->is_ref = $param->isPassedByReference();
             /** @var \ReflectionParameter $param */
             if($param->isArray()) {
                 $this->strict = false;

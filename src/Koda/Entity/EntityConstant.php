@@ -3,12 +3,15 @@ namespace Koda\Entity;
 
 
 use Koda\EntityInterface;
+use Koda\ToolKit;
 
 class EntityConstant implements EntityInterface {
 
     public $type = 0;
     public $value;
     public $name;
+    public $ns;
+
     public $line;
     public $class;
     public $short;
@@ -21,12 +24,9 @@ class EntityConstant implements EntityInterface {
      * @throws \LogicException
      */
     public function __construct($name, $value, $line, $class = null) {
+        list($this->ns, $base, $item) = ToolKit::splitNames($name);
+        $this->short = $item ?: $base;
         $this->name = $name;
-        if($class) {
-            $this->short = explode('\\', $name, 2)[1];
-        } else {
-            $this->short = trim('\\', strrchr($name, '\\'));
-        }
         if(!is_scalar($value)) {
             throw new \LogicException("Only scalar value allowed in constant");
         } else { // todo add resource handler

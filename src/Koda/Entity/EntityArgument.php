@@ -14,6 +14,7 @@ class EntityArgument implements EntityInterface {
      * @var string
      */
     public $description;
+    public $is_ref = false;
     /**
      * @var bool
      */
@@ -27,6 +28,10 @@ class EntityArgument implements EntityInterface {
     public function __construct(EntityFunction $function, $name) {
         $this->function = $function;
         $this->name = $name;
+    }
+
+    public function isRef() {
+        return intval($this->is_ref);
     }
 
     public function dump($tab = "") {

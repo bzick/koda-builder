@@ -11,6 +11,7 @@ use Symfony\Component\Finder\Finder;
 class Project implements EntityInterface {
 
     public $name;
+    public $alias;
     public $code;
 
     public $version = '0.0';
@@ -54,9 +55,11 @@ class Project implements EntityInterface {
         $project->name = $composer["name"];
         list($vendor, $name) = explode("/", $project->name);
         if($vendor == $name) {
-            $project->code = ucfirst($name);
+            $project->alias = ucfirst($name);
+            $project->code  = strtolower($name);
         } else {
-            $project->code = ucfirst($vendor).ucfirst($name);
+            $project->alias = ucfirst($vendor).ucfirst($name);
+            $project->code  = strtolower($vendor)."_".strtolower($name);
         }
         $project->description = $composer["description"];
         if(isset($composer["config"]["koda"]["version"])) {
@@ -156,7 +159,7 @@ class Project implements EntityInterface {
         }
         return "Project {$this->name} {".
             "\n$tab    version {$this->version}".
-            "\n$tab    code {$this->code}\n".
+            "\n$tab    alias {$this->alias}\n".
             "\n$tab    ".implode("\n$tab    ", $constants)."\n".
             "\n$tab    ".implode("\n$tab    ", $functions)."\n".
             "\n$tab    ".implode("\n$tab    ", $classes)."\n".
