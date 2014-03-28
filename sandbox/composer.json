@@ -12,8 +12,12 @@
         "psr-0": { "Koda\\Sandbox": "src/Names.php" }
     },
     "require": {
-        "php": ">=5.4"
+        "php": ">=5.4",
+	    "ext-tokenizer": "*"
     },
+	"suggest": {
+		"ext-socket": "setup socket, just for fun"
+	},
 	"config": {
 		"koda": {
 			"version": "echo '0.3'"

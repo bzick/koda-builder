@@ -6,10 +6,10 @@ use Koda\Entity\EntityClass;
 use Koda\Entity\EntityConstant;
 use Koda\Entity\EntityFile;
 use Koda\Entity\EntityFunction;
+use Koda\Entity\EntityModule;
 use Symfony\Component\Finder\Finder;
 
 class Project implements EntityInterface {
-
     public $name;
     public $alias;
     public $code;
@@ -44,6 +44,11 @@ class Project implements EntityInterface {
     public $constants = [];
 
     /**
+     * @var EntityModule[]
+     */
+    public $depends = [];
+
+    /**
      * @param string $path
      * @return Project
      */
@@ -74,6 +79,16 @@ class Project implements EntityInterface {
         foreach($composer["autoload"] as $loader) {
             $paths = array_merge($paths, array_values($loader));
         }
+        foreach($composer["require"] as $require => $version) {
+            if(strpos($require, "ext-") === 0) {
+                $project->addDepends(substr($require, 4))->setRequired();
+            }
+        }
+        foreach($composer["suggest"] as $suggest => $comment) {
+            if(strpos($suggest, "ext-") === 0) {
+                $project->addDepends(substr($suggest, 4))->setOptional();
+            }
+        }
         foreach($paths as $dir) {
             if(is_file($dir)) {
                 $project->files[realpath($dir)] = new EntityFile(realpath($dir));
@@ -85,6 +100,15 @@ class Project implements EntityInterface {
             }
         }
         return $project;
+    }
+
+    /**
+     * Set module dependency
+     * @param string $module
+     * @return EntityModule
+     */
+    public function addDepends($module) {
+        return $this->depends[$module] = new EntityModule($module);
     }
 
     /**

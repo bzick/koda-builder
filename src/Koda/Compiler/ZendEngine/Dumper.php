@@ -7,6 +7,7 @@ use Koda\Compiler\ZendEngine;
 use Koda\Entity\EntityArgument;
 use Koda\Entity\EntityConstant;
 use Koda\Entity\EntityFunction;
+use Koda\Entity\EntityModule;
 use Koda\Entity\Types;
 use Koda\FS;
 use Koda\Project;
@@ -155,7 +156,7 @@ HEADER;
     public function extC() {
         ob_start();
         $function_table = "NULL";
-        $depends = "NULL";
+        $deps = "NULL";
         $koda_version = \Koda::VERSION_STRING;
         echo <<<SOURCE
 #ifdef HAVE_CONFIG_H
@@ -174,6 +175,7 @@ HEADER;
 #endif
 
 SOURCE;
+        /* Functions */
         if($this->project->functions) {
             echo <<<SOURCE
 
@@ -196,7 +198,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_{$function->short}, 0, {$function->isReturnRef()}
 SOURCE;
                 foreach($function->arguments as $argument) {
                     echo <<<SOURCE
-    {$this->_arginfo($argument)} // $argument\n
+    {$this->_arginfo($argument)} // {$argument->dump()}
+
 SOURCE;
                 }
                 echo <<<SOURCE
@@ -217,13 +220,38 @@ const zend_function_entry {$this->code}_functions[] = {
 SOURCE;
             $function_table = "{$this->code}_functions";
         }
+
+        /* Dump depends */
+        if($this->project->depends) {
+            $depends = [];
+            foreach($this->project->depends as $depend) {
+                if($depend->type == EntityModule::DEP_REQUIRE) {
+                    $depends[] = "ZEND_MOD_REQUIRED(\"{$depend->name}\")";
+                } elseif($depend->type == EntityModule::DEP_OPTIONAL) {
+                    $depends[] = "ZEND_MOD_OPTIONAL(\"{$depend->name}\")";
+                } else {
+                    $depends[] = "ZEND_MOD_CONFLICTS(\"{$depend->name}\")";
+                }
+            }
+            $depends = implode("\n    ", $depends);
+            echo <<<SOURCE
+
+/* Dependency */
+static const zend_module_dep {$this->code}_depends[] = {
+    $depends
+    { NULL, NULL, NULL}
+};
+
+SOURCE;
+            $deps = "{$this->code}_depends";
+        }
         echo <<<SOURCE
 
 /* Declare module */
 zend_module_entry {$this->code}_module_entry = {
-    STANDARD_MODULE_HEADER_EX,
-    NULL,
-    {$depends},  // dependencies
+    STANDARD_MODULE_HEADER_EX,  // api, debug, zts
+    NULL,  // ini handler
+    {$deps},  // dependencies
     "{$this->code}",  // human readable module name
     {$function_table},  // list of global functions
     PHP_MINIT({$this->code}),  // module constructor
@@ -232,7 +260,7 @@ zend_module_entry {$this->code}_module_entry = {
     NULL,  // on end request callback
     PHP_MINFO({$this->code}),  // info for phpinfo()
     "{$this->project->version}",  // module version
-    STANDARD_MODULE_PROPERTIES
+    STANDARD_MODULE_PROPERTIES  // id, flags
 };
 
 /* Init module */
@@ -245,6 +273,7 @@ SOURCE;
                 continue;
             }
             echo <<<SOURCE
+    /* {$constant->dump()} */
     {$this->_constant($constant)}\n
 SOURCE;
         }
