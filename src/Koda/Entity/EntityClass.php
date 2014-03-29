@@ -16,7 +16,7 @@ class EntityClass implements EntityInterface {
      */
     public $properties = [];
     /**
-     * @var EntityFunction[]
+     * @var EntityMethod[]
      */
     public $methods = [];
     /**
@@ -29,6 +29,7 @@ class EntityClass implements EntityInterface {
     public $name;
     public $short;
     public $ns;
+    public $cname;
     public $ref;
 
     public function __construct($class, $aliases, array $line) {
@@ -37,6 +38,7 @@ class EntityClass implements EntityInterface {
         $this->ns      = $ref->getNamespaceName();
         $this->aliases = $aliases;
         $this->name    = $class;
+        $this->cname   = str_replace('\\', '_', $class);
         $this->line    = $line;
     }
 

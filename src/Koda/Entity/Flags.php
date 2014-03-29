@@ -23,6 +23,8 @@ class Flags {
     const IS_PRIVATE     = 0x400;
     const IS_PROTECTED   = 0x800;
 
+    const IS_DEPRECATED  = 0x1000;
+
     public static $keywords = [
         'abstract'  => self::IS_ABSTRACT,
         'final'     => self::IS_FINAL,

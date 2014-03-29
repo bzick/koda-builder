@@ -13,8 +13,10 @@ extern zend_module_entry koda_sandbox_module_entry;
 /* Global functions */
 PHP_FUNCTION(php_simple_function);
 
+
 /* Std module functions */
 PHP_MINIT_FUNCTION(koda_sandbox);
 PHP_MINFO_FUNCTION(koda_sandbox);
+PHP_MINIT_FUNCTION(Koda_Sandbox_Names); // init class Koda\Sandbox\Names
 
 #endif	/* PHP_KODA_SANDBOX_H */

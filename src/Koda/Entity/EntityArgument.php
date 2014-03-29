@@ -35,12 +35,10 @@ class EntityArgument implements EntityInterface {
     }
 
     public function dump($tab = "") {
-        if(!$this->type) {
-            $type = "mixed";
-        } elseif($this->type == "object") {
+        if($this->type == Types::OBJECT) {
             $type = $this->instance_of;
         } else {
-            $type = $this->type;
+            $type = Types::getTypeCode($this->type);
         }
         return $type.' $'.$this->name.($this->is_optional ? ' = '.var_export($this->default_value, true) : '');
     }

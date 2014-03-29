@@ -7,22 +7,22 @@
 #include "ext/standard/info.h"
 
 /* Extension */
+#include "koda_helper.h"
 #include "php_koda_sandbox.h"
 
 #ifdef COMPILE_DL_KODA_SANDBOX
     ZEND_GET_MODULE(koda_sandbox)
 #endif
-
 /* Global functions */
 
-/* proto function Koda\Sandbox\simple_function(float $x, int $y = 5):bool */
+/* proto function Koda\Sandbox\simple_function(string $x, string $y = 5):bool */
 PHP_FUNCTION(simple_function) {
     // coming soon ...
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_simple_function, 0, 0,  1)
-    ZEND_ARG_INFO(0, x) // float $x
-    ZEND_ARG_INFO(0, y) // int $y = 5
+    ZEND_ARG_INFO(0, x) // string $x
+    ZEND_ARG_INFO(0, y) // string $y = 5
 ZEND_END_ARG_INFO();
 
 /* Register functions */
@@ -34,13 +34,13 @@ const zend_function_entry koda_sandbox_functions[] = {
 /* Dependency */
 static const zend_module_dep koda_sandbox_depends[] = {
     ZEND_MOD_REQUIRED("tokenizer")
-    ZEND_MOD_OPTIONAL("socket")
+    ZEND_MOD_OPTIONAL("sockets")
     { NULL, NULL, NULL}
 };
 
 /* Declare module */
 zend_module_entry koda_sandbox_module_entry = {
-    STANDARD_MODULE_HEADER_EX,  // api, debug, zts
+    STANDARD_MODULE_HEADER_EX,  // api, debug, zts, ...
     NULL,  // ini handler
     koda_sandbox_depends,  // dependencies
     "koda_sandbox",  // human readable module name
@@ -51,7 +51,7 @@ zend_module_entry koda_sandbox_module_entry = {
     NULL,  // on end request callback
     PHP_MINFO(koda_sandbox),  // info for phpinfo()
     "0.3",  // module version
-    STANDARD_MODULE_PROPERTIES  // id, flags
+    STANDARD_MODULE_PROPERTIES  // id, flags, ...
 };
 
 /* Init module */

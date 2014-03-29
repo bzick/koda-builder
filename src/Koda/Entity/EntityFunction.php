@@ -166,31 +166,31 @@ class EntityFunction implements EntityInterface {
             /** @var \ReflectionParameter $param */
             if($param->isArray()) {
                 $this->strict = false;
-                $argument->type = 'array';
+                $argument->type = Types::ARR;
             }
             if($c = $param->getClass()) {
                 $this->strict = false;
-                $argument->type = "object";
+                $argument->type = Types::OBJECT;
                 $argument->instance_of = $c->name;
             } elseif(isset($doc_params[ $param->name ])) {
                 $_type = $doc_params[ $param->name ]["type"];
                 if(strpos($_type, "|")) { // multiple types
                     $this->strict = false;
-                    $argument->type = null;
+                    $argument->type = Types::MIXED;
                 } elseif($_type === "mixed") {
                     $this->strict = false;
-                    $argument->type = null;
+                    $argument->type = Types::MIXED;
                 } else {
                     if(strpos($_type, "[]")) {
                         $this->strict = false;
-                        $argument->type = 'array';
+                        $argument->type = Types::ARR;
                         $argument->hint = rtrim($_type, '[]');
                     }
                     if(isset(self::$_native[$_type])) {
-                        $argument->type = $_type;
+                        $argument->type = Types::getType($_type);
                     } else {
                         $_type = ltrim($_type,'\\');
-                        $argument->type = "object";
+                        $argument->type = Types::OBJECT;
                         $argument->instance_of =  $_type;
                     }
                 }

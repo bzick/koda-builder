@@ -51,6 +51,10 @@ class EntityMethod extends EntityFunction {
             $this->flags |= Flags::IS_PUBLIC;
         }
 
+        if($func->isStatic()) {
+            $this->flags |= Flags::IS_STATIC;
+        }
+
         if($func->isAbstract()) {
             $this->flags |= Flags::IS_ABSTRACT;
         } elseif($func->isFinal()) {
@@ -59,6 +63,9 @@ class EntityMethod extends EntityFunction {
 
         if($doc) {
             $params = $this->_parseDocBlock($doc);
+        }
+        if(isset($this->options['deprecated'])) {
+            $this->flags |= Flags::IS_DEPRECATED;
         }
         $this->_parseParams($func->getParameters(), $params);
     }

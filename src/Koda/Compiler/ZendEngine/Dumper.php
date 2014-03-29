@@ -5,9 +5,12 @@ namespace Koda\Compiler\ZendEngine;
 
 use Koda\Compiler\ZendEngine;
 use Koda\Entity\EntityArgument;
+use Koda\Entity\EntityClass;
 use Koda\Entity\EntityConstant;
 use Koda\Entity\EntityFunction;
+use Koda\Entity\EntityMethod;
 use Koda\Entity\EntityModule;
+use Koda\Entity\Flags;
 use Koda\Entity\Types;
 use Koda\FS;
 use Koda\Project;
@@ -37,7 +40,7 @@ class Dumper {
 
         /* import helpers and resources */
         $this->import(['gitignore' => '.gitignore']);
-//        $this->import('koda_helper.h');
+        $this->import('koda_helper.h');
 //        $this->import('koda_helper.c', true);
 
         /* dump main module C-file */
@@ -113,8 +116,27 @@ M4;
      * @return string
      */
     public function extH() {
+
+        if($this->project->classes) {
+            $init_classes = [];
+            foreach($this->project->classes as $class) {
+                $init_classes[] =  "PHP_MINIT_FUNCTION({$class->cname}); // init class {$class->name}";
+            }
+            $init_classes = implode("\n", $init_classes)."\n";
+        } else {
+            $init_classes = "";
+        }
+        if($this->project->functions) {
+            $functions = ["/* Global functions */"];
+            foreach($this->project->functions as $function) {
+                $functions[] = "PHP_FUNCTION(php_{$function->short});\n";
+            }
+            $functions = implode("\n", $functions)."\n";
+        } else {
+            $functions = "";
+        }
         ob_start();
-        echo <<<HEADER
+        echo <<<CONTENT
 #ifndef PHP_{$this->CODE}_H
 #define PHP_{$this->CODE}_H
 
@@ -127,24 +149,13 @@ extern zend_module_entry {$this->code}_module_entry;
 #  include "TSRM.h"
 #endif
 
-/* Global functions */
-
-HEADER;
-        foreach($this->project->functions as $function) {
-            if($function->class) {
-                continue;
-            }
-            echo "PHP_FUNCTION(php_{$function->short});\n";
-        }
-
-        echo <<<HEADER
-
+$functions
 /* Std module functions */
 PHP_MINIT_FUNCTION({$this->code});
 PHP_MINFO_FUNCTION({$this->code});
-
+$init_classes
 #endif	/* PHP_{$this->CODE}_H */\n
-HEADER;
+CONTENT;
         return ob_get_clean();
     }
 
@@ -158,7 +169,7 @@ HEADER;
         $function_table = "NULL";
         $deps = "NULL";
         $koda_version = \Koda::VERSION_STRING;
-        echo <<<SOURCE
+        echo <<<HEADER
 #ifdef HAVE_CONFIG_H
 #  include "config.h"
 #endif
@@ -168,48 +179,46 @@ HEADER;
 #include "ext/standard/info.h"
 
 /* Extension */
+#include "koda_helper.h"
 #include "php_{$this->code}.h"
 
 #ifdef COMPILE_DL_{$this->CODE}
     ZEND_GET_MODULE({$this->code})
 #endif
 
-SOURCE;
+HEADER;
         /* Functions */
         if($this->project->functions) {
-            echo <<<SOURCE
-
-/* Global functions */
-
-SOURCE;
+            echo "/* Global functions */\n";
             $entry_table = [];
             foreach($this->project->functions as $function) {
                 if($function->class) {
                     continue;
                 }
-                echo <<<SOURCE
+                if($function->arguments) {
+                    $arginfo     = [];
+                    foreach($function->arguments as $argument) {
+                        $arginfo[] = $this->_arginfo($argument)." // {$argument->dump()}";
+                    }
+                    $arginfo = "\n    ".implode("\n    ", $arginfo);
+                } else {
+                    $arginfo = "";
+                }
+                echo <<<DEFINE_FUNTION
 
 /* proto {$function->dump()} */
 PHP_FUNCTION({$function->short}) {
     // coming soon ...
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_{$function->short}, 0, {$function->isReturnRef()},  {$function->required})\n
-SOURCE;
-                foreach($function->arguments as $argument) {
-                    echo <<<SOURCE
-    {$this->_arginfo($argument)} // {$argument->dump()}
-
-SOURCE;
-                }
-                echo <<<SOURCE
+ZEND_BEGIN_ARG_INFO_EX(arginfo_{$function->short}, 0, {$function->isReturnRef()},  {$function->required}){$arginfo}
 ZEND_END_ARG_INFO();
 
-SOURCE;
+DEFINE_FUNTION;
                 $entry_table[] = $this->_fe($function);
             }
-            $entry_table = implode("    ", $entry_table);
-            echo <<<SOURCE
+            $entry_table = implode("\n    ", $entry_table);
+            echo <<<REGISTER_FUNC
 
 /* Register functions */
 const zend_function_entry {$this->code}_functions[] = {
@@ -217,7 +226,7 @@ const zend_function_entry {$this->code}_functions[] = {
     ZEND_FE_END
 };
 
-SOURCE;
+REGISTER_FUNC;
             $function_table = "{$this->code}_functions";
         }
 
@@ -234,7 +243,7 @@ SOURCE;
                 }
             }
             $depends = implode("\n    ", $depends);
-            echo <<<SOURCE
+            echo <<<DEPENDS
 
 /* Dependency */
 static const zend_module_dep {$this->code}_depends[] = {
@@ -242,14 +251,14 @@ static const zend_module_dep {$this->code}_depends[] = {
     { NULL, NULL, NULL}
 };
 
-SOURCE;
+DEPENDS;
             $deps = "{$this->code}_depends";
         }
-        echo <<<SOURCE
+        echo <<<REGISTER_MODULE
 
 /* Declare module */
 zend_module_entry {$this->code}_module_entry = {
-    STANDARD_MODULE_HEADER_EX,  // api, debug, zts
+    STANDARD_MODULE_HEADER_EX,  // api, debug, zts, ...
     NULL,  // ini handler
     {$deps},  // dependencies
     "{$this->code}",  // human readable module name
@@ -260,24 +269,24 @@ zend_module_entry {$this->code}_module_entry = {
     NULL,  // on end request callback
     PHP_MINFO({$this->code}),  // info for phpinfo()
     "{$this->project->version}",  // module version
-    STANDARD_MODULE_PROPERTIES  // id, flags
+    STANDARD_MODULE_PROPERTIES  // id, flags, ...
 };
 
 /* Init module */
 PHP_MINIT_FUNCTION({$this->code}) {
 
     /* Constants */\n
-SOURCE;
+REGISTER_MODULE;
         foreach($this->project->constants as $constant) {
             if($constant->class) {
                 continue;
             }
-            echo <<<SOURCE
+            echo <<<CONSTANTS
     /* {$constant->dump()} */
     {$this->_constant($constant)}\n
-SOURCE;
+CONSTANTS;
         }
-        echo <<<SOURCE
+        echo <<<FOOTER
 
     return SUCCESS;
 }
@@ -292,7 +301,7 @@ PHP_MINFO_FUNCTION({$this->code}) {
     php_info_print_table_end();
 
 }
-SOURCE;
+FOOTER;
         return ob_get_clean();
     }
 
@@ -303,7 +312,7 @@ SOURCE;
     private function _arginfo(EntityArgument $argument) {
         switch($argument->type) {
             case Types::OBJECT:
-                return "ZEND_ARG_OBJ_INFO({$argument->isRef()}, {$argument->name}, {$argument->instance_of}, 1)";
+                return "ZEND_ARG_OBJ_INFO({$argument->isRef()}, {$argument->name}, \"".addslashes($argument->instance_of)."\", ".intval($argument->is_optional).")";
             case Types::ARR:
                 return "ZEND_ARG_ARRAY_INFO({$argument->isRef()}, {$argument->name}, 1)";
             default:
@@ -332,37 +341,188 @@ SOURCE;
      */
     private function _constant(EntityConstant $constant) {
 
-        if($constant->ns) {
+        $flags = ", CONST_CS | CONST_PERSISTENT";
+        if($constant->class) {
+            $prefix = 'REGISTER_CLASS';
+            $name = 'ce_'.str_replace('\\', '_', $constant->class->name).', "'.addslashes($constant->short).'"';
+            $flags = '';
+        } elseif($constant->ns) {
             $name = '"'.addslashes($constant->ns).'", "'.addslashes($constant->short).'"';
             $prefix = 'REGISTER_NS';
+
         } else {
             $name = '"'.addslashes($constant->name).'"';
             $prefix = 'REGISTER';
         }
         switch($constant->type) {
             case Types::INT:
-                return "{$prefix}_LONG_CONSTANT({$name}, {$constant->value}, CONST_CS | CONST_PERSISTENT);";
+                return "{$prefix}_LONG_CONSTANT({$name}, {$constant->value}{$flags});";
             case Types::STRING:
-                return "{$prefix}_STRING_CONSTANT({$name}, \"".addslashes($constant->value)."\", CONST_CS | CONST_PERSISTENT);";
+                return "{$prefix}_STRING_CONSTANT({$name}, \"".addslashes($constant->value)."\"{$flags});";
             case Types::BOOLEAN:
-                return "{$prefix}_BOOL_CONSTANT({$name}, ".intval($constant->value).", CONST_CS | CONST_PERSISTENT);";
+                return "{$prefix}_BOOL_CONSTANT({$name}, ".intval($constant->value)."{$flags});";
             case Types::NIL:
-                return "{$prefix}_NULL_CONSTANT({$name}, CONST_CS | CONST_PERSISTENT);";
+                return "{$prefix}_NULL_CONSTANT({$name}{$flags});";
             case Types::DOUBLE:
-                return "{$prefix}_DOUBLE_CONSTANT({$name}, {$constant->value}, CONST_CS | CONST_PERSISTENT);";
+                return "{$prefix}_DOUBLE_CONSTANT({$name}, {$constant->value}{$flags});";
             default:
                 throw new \LogicException("Unknown type $constant");
         }
     }
 
-    public function classH() {
+    /**
+     * @param EntityClass $class
+     * @return string
+     */
+    public function classH(EntityClass $class) {
         ob_start();
+        $name = str_replace('\\', '_', $class->name);
+        $NAME = strtoupper($name);
+        $methods = [];
+        foreach($class->methods as $method) {
+            $methods[] = "PHP_METHOD({$name}, {$method->short});";
+        }
+        $methods = implode("\n", $methods);
+        echo <<<CONTENT
+#ifndef PHP_{$NAME}_H
+#define PHP_{$NAME}_H
+
+BEGIN_EXTERN_C();
+
+/* Declare class entry */
+extern zend_class_entry *ce_{$name};
+
+/* Methods */
+{$methods}
+
+/* Init function */
+PHP_MINIT_FUNCTION({$name});
+
+END_EXTERN_C();
+
+#endif	/* PHP_{$NAME}_H */\n
+CONTENT;
         return ob_get_clean();
     }
 
-    public function classC() {
+    /**
+     * @param EntityClass $class
+     * @return string
+     */
+    public function classC(EntityClass $class) {
+        $escaped = addslashes($class->name);
+        $name = str_replace('\\', '_', $class->name);
+        $NAME = strtoupper($name);
         ob_start();
+        echo <<<TOP
+/* Extension */
+#include "koda_helper.h"
+#include "php_{$this->code}.h"
+#include "{$name}.h"
+
+zend_class_entry *ce_{$name};
+zend_object_handlers handlers_{$name};
+
+TOP;
+        if($class->methods) {
+            $method_table = [];
+            foreach($class->methods as $method) {
+                $method_table[] = "ZEND_ME({$name}, {$method->short}, arginfo_{$method->short}, {$this->_meFlags($method)})";
+                if($method->arguments) {
+                    $arginfo     = [];
+                    foreach($method->arguments as $argument) {
+                        $arginfo[] = $this->_arginfo($argument)." // {$argument->dump()}";
+                    }
+                    $arginfo = "\n    ".implode("\n    ", $arginfo);
+                } else {
+                    $arginfo = "";
+                }
+                echo <<<METHOD
+
+/* proto {$method->dump()} */
+PHP_METHOD({$name}, {$method->short}) {
+    // coming soon
+}
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_{$method->short}, 0, {$method->isReturnRef()}, {$method->required}){$arginfo}
+ZEND_END_ARG_INFO();
+
+
+METHOD;
+            }
+            $method_table = implode("\n    ", $method_table);
+        } else {
+            $method_table = "";
+        }
+        echo <<<REGISTER_METHODS
+/* Register methods */
+static const zend_function_entry {$name}_methods[] = {
+    {$method_table}
+    {NULL, NULL, NULL}
+};
+
+REGISTER_METHODS;
+
+        if($class->constants) {
+            $constants = ["/* Class constants */"];
+            foreach($class->constants as $constant) {
+                $constants[] = "/* {$constant->dump()} */";
+                $constants[] = $this->_constant($constant);
+            }
+            $constants = implode("\n    ", $constants)."\n";
+        } else {
+            $constants = "";
+        }
+
+        echo <<<REGISTER_CLASS
+
+/* Init class */
+PHP_MINIT_FUNCTION({$name}) {
+    zend_class_entry ce;
+
+    /* Init class entry */
+    INIT_CLASS_ENTRY(ce, {$escaped}, {$name}_methods);
+    ce_{$name} = zend_register_internal_class(&ce TSRMLS_CC);
+    memcpy(&handlers_{$name}, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+
+    {$constants}
+    return SUCCESS;
+}
+
+REGISTER_CLASS;
         return ob_get_clean();
+    }
+
+    /**
+     * Calculate flags for method entry
+     * @param EntityMethod $method
+     * @return string
+     */
+    private function _meFlags(EntityMethod $method) {
+        static $names = [
+            "__construct" => "ZEND_ACC_CTOR",
+            "__destruct"  => "ZEND_ACC_DTOR",
+            "__clone"     => "ZEND_ACC_CLONE"
+        ];
+        static $marks = [
+            Flags::IS_STATIC     => "ZEND_ACC_STATIC",
+            Flags::IS_ABSTRACT   => "ZEND_ACC_ABSTRACT",
+            Flags::IS_FINAL      => "ZEND_ACC_FINAL",
+            Flags::IS_PUBLIC     => "ZEND_ACC_PUBLIC",
+            Flags::IS_PROTECTED  => "ZEND_ACC_PROTECTED",
+            Flags::IS_PRIVATE    => "ZEND_ACC_PRIVATE",
+            Flags::IS_DEPRECATED => "ZEND_ACC_DEPRECATED"
+        ];
+        $flags = [];
+        if(isset($names[$method->short])) {
+            $flags[] = $names[$method->short];
+        }
+        foreach($marks as $mark => $flag) {
+            if($method->flags & $mark) {
+                $flags[] = $flag;
+            }
+        }
+        return implode(" | ", $flags);
     }
 
 } 

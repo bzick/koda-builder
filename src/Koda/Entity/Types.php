@@ -32,11 +32,32 @@ class Types {
         "callback" => self::CALLBACK,
     ];
 
+    public static $types = [
+        self::MIXED => "mixed",
+        self::BOOLEAN => "boolean",
+        self::INT => "int",
+        self::DOUBLE => "double",
+        self::STRING => "string",
+        self::ARR => "array",
+        self::OBJECT => "object",
+        self::RESOURCE => "resource",
+        self::NIL => "null",
+        self::CALLBACK => "callable",
+    ];
+
     public static function getType($value) {
         if(isset(self::$codes[gettype($value)])) {
             return self::$codes[gettype($value)];
         } else {
-            throw new \LogicException("Unknown value type");
+            throw new \LogicException("Unknown code type");
+        }
+    }
+
+    public static function getTypeCode($type) {
+        if(isset(self::$types[$type])) {
+            return self::$types[$type];
+        } else {
+            throw new \LogicException("Unknown type");
         }
     }
 }

@@ -6,8 +6,27 @@ Project koda/sandbox {
     const Koda\Sandbox\FLOAT_FIVE = 5.5
     const Koda\Sandbox\STRING_FIVE = 'five'
 
-    function Koda\Sandbox\simple_function(float $x, int $y = 5):bool
+    function Koda\Sandbox\simple_function(string $x, string $y = 5):bool
 
-    
+    class Koda\Sandbox\Names {
+        const Koda\Sandbox\Names::FIVE = 5
+        const Koda\Sandbox\Names::FLOAT_FIVE = 5.5
+        const Koda\Sandbox\Names::STRING_FIVE = 'five'
+
+        prop Koda\Sandbox\Names::$five  [public]
+        prop Koda\Sandbox\Names::$float_five  [protected]
+        prop Koda\Sandbox\Names::$string_five  [private]
+
+        method Koda\Sandbox\Names::__construct(Koda\Sandbox\Names $self, array $list = NULL):void  [public]
+        method Koda\Sandbox\Names::publicStatic():void  [static public]
+        method Koda\Sandbox\Names::privateStatic():void  [static private]
+        method Koda\Sandbox\Names::protectedStatic():void  [static protected]
+        method Koda\Sandbox\Names::publicMethod():void  [public]
+        method Koda\Sandbox\Names::privateMethod():void  [private]
+        method Koda\Sandbox\Names::protectedMethod():void  [protected]
+        method Koda\Sandbox\Names::__clone():void  [public]
+        method Koda\Sandbox\Names::__destruct():void  [public]
+
+    }
 
 }

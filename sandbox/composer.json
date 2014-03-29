@@ -16,7 +16,7 @@
 	    "ext-tokenizer": "*"
     },
 	"suggest": {
-		"ext-socket": "setup socket, just for fun"
+		"ext-sockets": "setup socket, just for fun"
 	},
 	"config": {
 		"koda": {
