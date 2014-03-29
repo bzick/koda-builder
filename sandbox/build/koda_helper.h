@@ -3,6 +3,9 @@
 
 BEGIN_EXTERN_C();
 
+#define STARTUP_MODULE(module) \
+    ZEND_MODULE_STARTUP_N(module)(INIT_FUNC_ARGS_PASSTHRU)
+
 #define REGISTER_CLASS_BOOL_CONSTANT(class_entry, name, value)   \
     zend_declare_class_constant_long(class_entry, name, sizeof(name)-1, (long)value TSRMLS_CC)
 

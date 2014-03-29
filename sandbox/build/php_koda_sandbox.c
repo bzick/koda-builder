@@ -53,10 +53,8 @@ zend_module_entry koda_sandbox_module_entry = {
     "0.3",  // module version
     STANDARD_MODULE_PROPERTIES  // id, flags, ...
 };
-
 /* Init module */
 PHP_MINIT_FUNCTION(koda_sandbox) {
-
     /* Constants */
     /* const Koda\Sandbox\FIVE = 5 */
     REGISTER_NS_LONG_CONSTANT("Koda\\Sandbox", "FIVE", 5, CONST_CS | CONST_PERSISTENT);
@@ -64,7 +62,8 @@ PHP_MINIT_FUNCTION(koda_sandbox) {
     REGISTER_NS_DOUBLE_CONSTANT("Koda\\Sandbox", "FLOAT_FIVE", 5.5, CONST_CS | CONST_PERSISTENT);
     /* const Koda\Sandbox\STRING_FIVE = 'five' */
     REGISTER_NS_STRING_CONSTANT("Koda\\Sandbox", "STRING_FIVE", "five", CONST_CS | CONST_PERSISTENT);
-
+    /* Constants */
+    STARTUP_MODULE(Koda_Sandbox_Names); // init Koda\Sandbox\Names
     return SUCCESS;
 }
 

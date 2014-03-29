@@ -1,7 +1,7 @@
 /* Extension */
+#include "php.h"
 #include "koda_helper.h"
-#include "php_koda_sandbox.h"
-#include "Koda_Sandbox_Names.h"
+#include "Koda/Sandbox/Names.h"
 
 zend_class_entry *ce_Koda_Sandbox_Names;
 zend_object_handlers handlers_Koda_Sandbox_Names;
@@ -107,7 +107,7 @@ PHP_MINIT_FUNCTION(Koda_Sandbox_Names) {
     zend_class_entry ce;
 
     /* Init class entry */
-    INIT_CLASS_ENTRY(ce, Koda\\Sandbox\\Names, Koda_Sandbox_Names_methods);
+    INIT_CLASS_ENTRY(ce, "Koda\\Sandbox\\Names", Koda_Sandbox_Names_methods);
     ce_Koda_Sandbox_Names = zend_register_internal_class(&ce TSRMLS_CC);
     memcpy(&handlers_Koda_Sandbox_Names, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 

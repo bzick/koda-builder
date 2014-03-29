@@ -100,7 +100,7 @@ CFLAGS="\$CFLAGS -Wall -g3 -ggdb -O0"
 if test "\$PHP_{$this->CODE}" != "no"; then
     PHP_ADD_INCLUDE(.)
     PHP_SUBST({$this->CODE}_SHARED_LIBADD)
-    PHP_NEW_EXTENSION({$this->code}, "{$sources}", \$ext_shared,, \$CFLAGS)
+    PHP_NEW_EXTENSION({$this->code}, {$sources}, \$ext_shared,, \$CFLAGS)
 fi
 M4;
         return ob_get_clean();
@@ -152,8 +152,8 @@ extern zend_module_entry {$this->code}_module_entry;
 $functions
 /* Std module functions */
 PHP_MINIT_FUNCTION({$this->code});
-PHP_MINFO_FUNCTION({$this->code});
 $init_classes
+PHP_MINFO_FUNCTION({$this->code});
 #endif	/* PHP_{$this->CODE}_H */\n
 CONTENT;
         return ob_get_clean();
@@ -272,24 +272,39 @@ zend_module_entry {$this->code}_module_entry = {
     STANDARD_MODULE_PROPERTIES  // id, flags, ...
 };
 
+REGISTER_MODULE;
+        if($this->project->constants) {
+            $constants = ['/* Constants */'];
+            foreach($this->project->constants as $constant) {
+                if($constant->class) {
+                    continue;
+                }
+                $constants[] = "/* {$constant->dump()} */";
+                $constants[] = $this->_constant($constant);
+            }
+            $constants = implode("\n    ", $constants);
+        } else {
+            $constants = "";
+        }
+        if($this->project->classes) {
+            $inits = ['/* Constants */'];
+            foreach($this->project->classes as $class) {
+                $inits[] = "STARTUP_MODULE({$class->cname}); // init {$class->name}";
+            }
+            $inits = implode("\n    ", $inits);
+        } else {
+            $inits = "";
+        }
+        echo <<<INIT_MODULE
 /* Init module */
 PHP_MINIT_FUNCTION({$this->code}) {
-
-    /* Constants */\n
-REGISTER_MODULE;
-        foreach($this->project->constants as $constant) {
-            if($constant->class) {
-                continue;
-            }
-            echo <<<CONSTANTS
-    /* {$constant->dump()} */
-    {$this->_constant($constant)}\n
-CONSTANTS;
-        }
-        echo <<<FOOTER
-
+    {$constants}
+    {$inits}
     return SUCCESS;
 }
+
+INIT_MODULE;
+        echo <<<FOOTER
 
 /* Build phpinfo table */
 PHP_MINFO_FUNCTION({$this->code}) {
@@ -411,14 +426,14 @@ CONTENT;
      */
     public function classC(EntityClass $class) {
         $escaped = addslashes($class->name);
-        $name = str_replace('\\', '_', $class->name);
-        $NAME = strtoupper($name);
+        $name = $class->cname;
+        $path = str_replace('\\', '/', $class->name);
         ob_start();
         echo <<<TOP
 /* Extension */
+#include "php.h"
 #include "koda_helper.h"
-#include "php_{$this->code}.h"
-#include "{$name}.h"
+#include "{$path}.h"
 
 zend_class_entry *ce_{$name};
 zend_object_handlers handlers_{$name};
@@ -481,7 +496,7 @@ PHP_MINIT_FUNCTION({$name}) {
     zend_class_entry ce;
 
     /* Init class entry */
-    INIT_CLASS_ENTRY(ce, {$escaped}, {$name}_methods);
+    INIT_CLASS_ENTRY(ce, "{$escaped}", {$name}_methods);
     ce_{$name} = zend_register_internal_class(&ce TSRMLS_CC);
     memcpy(&handlers_{$name}, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 
