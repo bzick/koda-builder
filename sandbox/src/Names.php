@@ -19,7 +19,7 @@ function simple_function($x, $y = 5) {
     return true;
 }
 
-class Names {
+class Names extends \ArrayObject implements \JsonSerializable {
 
 
     const FIVE = 5;
@@ -34,7 +34,7 @@ class Names {
 
     }
 
-    public static function publicStatic() {
+    final public static function publicStatic() {
 
     }
 
@@ -66,4 +66,7 @@ class Names {
 
     }
 
+    public function jsonSerialize() {
+
+    }
 }

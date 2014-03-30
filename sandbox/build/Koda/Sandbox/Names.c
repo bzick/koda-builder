@@ -6,6 +6,8 @@
 zend_class_entry *ce_Koda_Sandbox_Names;
 zend_object_handlers handlers_Koda_Sandbox_Names;
 
+BEGIN_EXTERN_C();
+
 /* proto method Koda\Sandbox\Names::__construct(Koda\Sandbox\Names $self, array $list = NULL):void  [public] */
 PHP_METHOD(Koda_Sandbox_Names, __construct) {
     // coming soon
@@ -17,7 +19,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo___construct, 0, 0, 1)
 ZEND_END_ARG_INFO();
 
 
-/* proto method Koda\Sandbox\Names::publicStatic():void  [static public] */
+/* proto method Koda\Sandbox\Names::publicStatic():void  [final static public] */
 PHP_METHOD(Koda_Sandbox_Names, publicStatic) {
     // coming soon
 }
@@ -88,10 +90,19 @@ PHP_METHOD(Koda_Sandbox_Names, __destruct) {
 ZEND_BEGIN_ARG_INFO_EX(arginfo___destruct, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
+
+/* proto method Koda\Sandbox\Names::jsonSerialize():void  [public] */
+PHP_METHOD(Koda_Sandbox_Names, jsonSerialize) {
+    // coming soon
+}
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_jsonSerialize, 0, 0, 0)
+ZEND_END_ARG_INFO();
+
 /* Register methods */
 static const zend_function_entry Koda_Sandbox_Names_methods[] = {
     ZEND_ME(Koda_Sandbox_Names, __construct, arginfo___construct, ZEND_ACC_CTOR | ZEND_ACC_PUBLIC)
-    ZEND_ME(Koda_Sandbox_Names, publicStatic, arginfo_publicStatic, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+    ZEND_ME(Koda_Sandbox_Names, publicStatic, arginfo_publicStatic, ZEND_ACC_STATIC | ZEND_ACC_FINAL | ZEND_ACC_PUBLIC)
     ZEND_ME(Koda_Sandbox_Names, privateStatic, arginfo_privateStatic, ZEND_ACC_STATIC | ZEND_ACC_PRIVATE)
     ZEND_ME(Koda_Sandbox_Names, protectedStatic, arginfo_protectedStatic, ZEND_ACC_STATIC | ZEND_ACC_PROTECTED)
     ZEND_ME(Koda_Sandbox_Names, publicMethod, arginfo_publicMethod, ZEND_ACC_PUBLIC)
@@ -99,6 +110,7 @@ static const zend_function_entry Koda_Sandbox_Names_methods[] = {
     ZEND_ME(Koda_Sandbox_Names, protectedMethod, arginfo_protectedMethod, ZEND_ACC_PROTECTED)
     ZEND_ME(Koda_Sandbox_Names, __clone, arginfo___clone, ZEND_ACC_CLONE | ZEND_ACC_PUBLIC)
     ZEND_ME(Koda_Sandbox_Names, __destruct, arginfo___destruct, ZEND_ACC_DTOR | ZEND_ACC_PUBLIC)
+    ZEND_ME(Koda_Sandbox_Names, jsonSerialize, arginfo_jsonSerialize, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
@@ -108,8 +120,12 @@ PHP_MINIT_FUNCTION(Koda_Sandbox_Names) {
 
     /* Init class entry */
     INIT_CLASS_ENTRY(ce, "Koda\\Sandbox\\Names", Koda_Sandbox_Names_methods);
-    ce_Koda_Sandbox_Names = zend_register_internal_class(&ce TSRMLS_CC);
-    memcpy(&handlers_Koda_Sandbox_Names, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+    ce_Koda_Sandbox_Names = zend_register_internal_class_ex(&ce, NULL, "arrayobject" TSRMLS_CC);
+    if(!ce_Koda_Sandbox_Names) {
+        zend_error(E_CORE_ERROR, "koda/sandbox: class Koda\\Sandbox\\Names can't extends class ArrayObject: class ArrayObject not found");
+        return FAILURE;
+    }
+    kd_implements_class(ce_Koda_Sandbox_Names, 6, "countable", "serializable", "arrayaccess", "traversable", "iteratoraggregate", "jsonserializable");
 
     /* Class constants */
     /* const Koda\Sandbox\Names::FIVE = 5 */
@@ -121,3 +137,5 @@ PHP_MINIT_FUNCTION(Koda_Sandbox_Names) {
 
     return SUCCESS;
 }
+
+END_EXTERN_C();

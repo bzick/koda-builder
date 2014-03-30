@@ -16,6 +16,7 @@ PHP_METHOD(Koda_Sandbox_Names, privateMethod);
 PHP_METHOD(Koda_Sandbox_Names, protectedMethod);
 PHP_METHOD(Koda_Sandbox_Names, __clone);
 PHP_METHOD(Koda_Sandbox_Names, __destruct);
+PHP_METHOD(Koda_Sandbox_Names, jsonSerialize);
 
 /* Init function */
 PHP_MINIT_FUNCTION(Koda_Sandbox_Names);

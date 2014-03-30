@@ -6,8 +6,14 @@ namespace Koda\Entity;
 use Koda\EntityInterface;
 
 class EntityClass implements EntityInterface {
-    public $extends;
-    public $implements = [];
+    /**
+     * @var EntityClass
+     */
+    public $parent;
+    /**
+     * @var EntityClass[]
+     */
+    public $interfaces = [];
     public $traits = [];
 
     public $flags = 0;
@@ -24,12 +30,18 @@ class EntityClass implements EntityInterface {
      */
     public $constants = [];
 
+    /**
+     * @var \ReflectionExtension
+     */
+    public $extension;
+
     public $aliases;
 
     public $name;
     public $short;
     public $ns;
     public $cname;
+    public $escaped;
     public $ref;
 
     public function __construct($class, $aliases, array $line) {
@@ -39,7 +51,11 @@ class EntityClass implements EntityInterface {
         $this->aliases = $aliases;
         $this->name    = $class;
         $this->cname   = str_replace('\\', '_', $class);
+        $this->escaped = addslashes($class);
         $this->line    = $line;
+        $this->interfaces = $ref->getInterfaces();
+        $this->parent     = $ref->getParentClass();
+        $this->extension  = $ref->getExtension();
     }
 
     public function setAliases($aliases) {
@@ -65,21 +81,8 @@ class EntityClass implements EntityInterface {
         return $method;
     }
 
-    public function setConstructor($body) {
-//        $this->aliases = $aliases;
-    }
-
-    public function setDestructor($body) {
-//        $this->aliases = $aliases;
-    }
-
-
     public function __toString() {
         return "class {$this->name}";
-    }
-
-    public function scan() {
-
     }
 
     public function dump($tab = "") {
@@ -95,7 +98,9 @@ class EntityClass implements EntityInterface {
         foreach($this->properties as $property) {
             $properties[] = $property->dump($tab.'    ');
         }
-        return "class {$this->name} {".
+        return "class {$this->name} {\n".
+        "$tab    parent: {$this->parent->name}\n".
+        "$tab    interfaces: ".implode(", ", array_keys($this->interfaces))."\n".
         ($constants  ? "\n$tab    ".implode("\n$tab    ", $constants)."\n" : "").
         ($properties ? "\n$tab    ".implode("\n$tab    ", $properties)."\n": "").
         ($functions  ? "\n$tab    ".implode("\n$tab    ", $functions)."\n" : "").

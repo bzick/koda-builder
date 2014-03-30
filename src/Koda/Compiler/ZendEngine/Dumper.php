@@ -34,6 +34,9 @@ class Dumper {
 
     }
 
+    /**
+     * Create sources
+     */
     public function dump() {
         /* dump project map */
         $this->put('report/project_map.txt', ToolKit::dump($this->project));
@@ -41,7 +44,7 @@ class Dumper {
         /* import helpers and resources */
         $this->import(['gitignore' => '.gitignore']);
         $this->import('koda_helper.h');
-//        $this->import('koda_helper.c', true);
+        $this->import('koda_helper.c', true);
 
         /* dump main module C-file */
         $this->file('php_'.$this->code, $this->extH(), $this->extC());
@@ -182,6 +185,8 @@ CONTENT;
 #include "koda_helper.h"
 #include "php_{$this->code}.h"
 
+BEGIN_EXTERN_C();
+
 #ifdef COMPILE_DL_{$this->CODE}
     ZEND_GET_MODULE({$this->code})
 #endif
@@ -316,6 +321,8 @@ PHP_MINFO_FUNCTION({$this->code}) {
     php_info_print_table_end();
 
 }
+
+END_EXTERN_C();
 FOOTER;
         return ob_get_clean();
     }
@@ -438,6 +445,8 @@ CONTENT;
 zend_class_entry *ce_{$name};
 zend_object_handlers handlers_{$name};
 
+BEGIN_EXTERN_C();
+
 TOP;
         if($class->methods) {
             $method_table = [];
@@ -488,6 +497,24 @@ REGISTER_METHODS;
         } else {
             $constants = "";
         }
+        $register = [];
+        if($class->flags & Flags::IS_INTERFACE) {
+            $register[] = "ce_{$name} = zend_register_internal_interface(&ce TSRMLS_CC);";
+        } elseif($class->parent) {
+            $register[] = "ce_{$name} = zend_register_internal_class_ex(&ce, NULL, \"".strtolower($class->parent->escaped)."\" TSRMLS_CC);";
+            $register[] = "if(!ce_{$name}) {";
+            $register[] = "    zend_error(E_CORE_ERROR, \"{$this->project->name}: class {$class->escaped} can't extends class {$class->parent->escaped}: class {$class->parent->escaped} not found\");";
+            $register[] = "    return FAILURE;";
+            $register[] = "}";
+        } else {
+            $register[] = "ce_{$name} = zend_register_internal_class(&ce TSRMLS_CC);";
+            $register[] = "memcpy(&handlers_{$name}, zend_get_std_object_handlers(), sizeof(zend_object_handlers));";
+        }
+        if($class->interfaces) {
+            $interfaces = implode('", "', array_map('strtolower', array_map('addslashes', array_keys($class->interfaces))));
+            $register[] = "kd_implements_class(ce_{$name}, ".count($class->interfaces).", \"{$interfaces}\");";
+        }
+        $register = implode("\n    ", $register);
 
         echo <<<REGISTER_CLASS
 
@@ -497,12 +524,13 @@ PHP_MINIT_FUNCTION({$name}) {
 
     /* Init class entry */
     INIT_CLASS_ENTRY(ce, "{$escaped}", {$name}_methods);
-    ce_{$name} = zend_register_internal_class(&ce TSRMLS_CC);
-    memcpy(&handlers_{$name}, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+    {$register}
 
     {$constants}
     return SUCCESS;
 }
+
+END_EXTERN_C();
 
 REGISTER_CLASS;
         return ob_get_clean();

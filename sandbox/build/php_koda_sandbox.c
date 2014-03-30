@@ -10,6 +10,8 @@
 #include "koda_helper.h"
 #include "php_koda_sandbox.h"
 
+BEGIN_EXTERN_C();
+
 #ifdef COMPILE_DL_KODA_SANDBOX
     ZEND_GET_MODULE(koda_sandbox)
 #endif
@@ -35,6 +37,9 @@ const zend_function_entry koda_sandbox_functions[] = {
 static const zend_module_dep koda_sandbox_depends[] = {
     ZEND_MOD_REQUIRED("tokenizer")
     ZEND_MOD_OPTIONAL("sockets")
+    ZEND_MOD_REQUIRED("SPL")
+    ZEND_MOD_REQUIRED("Core")
+    ZEND_MOD_REQUIRED("json")
     { NULL, NULL, NULL}
 };
 
@@ -77,3 +82,5 @@ PHP_MINFO_FUNCTION(koda_sandbox) {
     php_info_print_table_end();
 
 }
+
+END_EXTERN_C();

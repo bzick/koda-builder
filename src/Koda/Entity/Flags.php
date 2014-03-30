@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: bzick
- * Date: 19.03.14
- * Time: 1:17
- */
 
 namespace Koda\Entity;
 
@@ -26,9 +20,10 @@ class Flags {
     const IS_DEPRECATED  = 0x1000;
 
     public static $keywords = [
-        'abstract'  => self::IS_ABSTRACT,
-        'final'     => self::IS_FINAL,
-        'static'    => self::IS_STATIC,
+        'abstract'   => self::IS_ABSTRACT,
+        'final'      => self::IS_FINAL,
+        'static'     => self::IS_STATIC,
+        'deprecated' => self::IS_DEPRECATED,
 
         'public'    => self::IS_PUBLIC,
         'private'   => self::IS_PRIVATE,
@@ -43,6 +38,7 @@ class Flags {
         self::IS_ABSTRACT   => 'abstract',
         self::IS_FINAL      => 'final',
         self::IS_STATIC     => 'static',
+        self::IS_DEPRECATED => 'deprecated',
 
         self::IS_PUBLIC     => 'public',
         self::IS_PRIVATE    => 'private',
