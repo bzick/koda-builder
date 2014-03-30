@@ -10,6 +10,7 @@ use Koda\Entity\EntityConstant;
 use Koda\Entity\EntityFunction;
 use Koda\Entity\EntityMethod;
 use Koda\Entity\EntityModule;
+use Koda\Entity\EntityProperty;
 use Koda\Entity\Flags;
 use Koda\Entity\Types;
 use Koda\FS;
@@ -366,7 +367,7 @@ FOOTER;
         $flags = ", CONST_CS | CONST_PERSISTENT";
         if($constant->class) {
             $prefix = 'REGISTER_CLASS';
-            $name = 'ce_'.str_replace('\\', '_', $constant->class->name).', "'.addslashes($constant->short).'"';
+            $name = 'ce_'.$constant->class->cname.', "'.addslashes($constant->short).'"';
             $flags = '';
         } elseif($constant->ns) {
             $name = '"'.addslashes($constant->ns).'", "'.addslashes($constant->short).'"';
@@ -389,6 +390,42 @@ FOOTER;
                 return "{$prefix}_DOUBLE_CONSTANT({$name}, {$constant->value}{$flags});";
             default:
                 throw new \LogicException("Unknown type $constant");
+        }
+    }
+
+    /**
+     * Convert class property to ZE representation
+     * @param \Koda\Entity\EntityProperty $property
+     * @throws \LogicException
+     * @return string
+     */
+    private function _property(EntityProperty $property) {
+        static $marks = [
+            Flags::IS_STATIC     => "ZEND_ACC_STATIC",
+            Flags::IS_PUBLIC     => "ZEND_ACC_PUBLIC",
+            Flags::IS_PROTECTED  => "ZEND_ACC_PROTECTED",
+            Flags::IS_PRIVATE    => "ZEND_ACC_PRIVATE"
+        ];
+        $flags = [];
+        foreach($marks as $mark => $flag) {
+            if($property->flags & $mark) {
+                $flags[] = $flag;
+            }
+        }
+        $flags = implode(" | ", $flags);
+        switch($property->type) {
+            case Types::INT:
+                return "REGISTER_CLASS_LONG_PROPERTY(ce_{$property->class->cname}, \"{$property->name}\", {$property->value}, {$flags});";
+            case Types::STRING:
+                return "REGISTER_CLASS_STRING_PROPERTY(ce_{$property->class->cname}, \"{$property->name}\", \"".addslashes($property->value)."\", {$flags});";
+            case Types::BOOLEAN:
+                return "REGISTER_CLASS_BOOL_PROPERTY(ce_{$property->class->cname}, \"{$property->name}\", ".intval($property->value).", {$flags});";
+            case Types::NIL:
+                return "REGISTER_CLASS_NULL_PROPERTY(ce_{$property->class->cname}, \"{$property->name}\", {$flags});";
+            case Types::DOUBLE:
+                return "REGISTER_CLASS_DOUBLE_PROPERTY(ce_{$property->class->cname}, \"{$property->name}\", {$property->value}, {$flags});";
+            default:
+                throw new \LogicException("Unknown type $property");
         }
     }
 
@@ -497,6 +534,16 @@ REGISTER_METHODS;
         } else {
             $constants = "";
         }
+        if($class->properties) {
+            $properties = ["/* Class properties */"];
+            foreach($class->properties as $prop) {
+                $properties[] = "/* {$prop->dump()} */";
+                $properties[] = $this->_property($prop);
+            }
+            $properties = implode("\n    ", $properties)."\n";
+        } else {
+            $properties = "";
+        }
         $register = [];
         if($class->flags & Flags::IS_INTERFACE) {
             $register[] = "ce_{$name} = zend_register_internal_interface(&ce TSRMLS_CC);";
@@ -527,6 +574,7 @@ PHP_MINIT_FUNCTION({$name}) {
     {$register}
 
     {$constants}
+    {$properties}
     return SUCCESS;
 }
 

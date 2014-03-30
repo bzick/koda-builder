@@ -28,7 +28,7 @@ class Names extends \ArrayObject implements \JsonSerializable {
 
     public $five = 5;
     protected $float_five = 5.5;
-    private $string_five = 'five';
+    private static $string_five = 'five';
 
     public function __construct(Names $self, array $list = null) {
 

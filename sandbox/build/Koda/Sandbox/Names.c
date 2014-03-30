@@ -135,6 +135,14 @@ PHP_MINIT_FUNCTION(Koda_Sandbox_Names) {
     /* const Koda\Sandbox\Names::STRING_FIVE = 'five' */
     REGISTER_CLASS_STRING_CONSTANT(ce_Koda_Sandbox_Names, "STRING_FIVE", "five");
 
+    /* Class properties */
+    /* prop Koda\Sandbox\Names::$five  [public] */
+    REGISTER_CLASS_LONG_PROPERTY(ce_Koda_Sandbox_Names, "five", 5, ZEND_ACC_PUBLIC);
+    /* prop Koda\Sandbox\Names::$float_five  [protected] */
+    REGISTER_CLASS_DOUBLE_PROPERTY(ce_Koda_Sandbox_Names, "float_five", 5.5, ZEND_ACC_PROTECTED);
+    /* prop Koda\Sandbox\Names::$string_five  [static private] */
+    REGISTER_CLASS_STRING_PROPERTY(ce_Koda_Sandbox_Names, "string_five", "five", ZEND_ACC_STATIC | ZEND_ACC_PRIVATE);
+
     return SUCCESS;
 }
 

@@ -18,7 +18,7 @@ Project koda/sandbox {
 
         prop Koda\Sandbox\Names::$five  [public]
         prop Koda\Sandbox\Names::$float_five  [protected]
-        prop Koda\Sandbox\Names::$string_five  [private]
+        prop Koda\Sandbox\Names::$string_five  [static private]
 
         method Koda\Sandbox\Names::__construct(Koda\Sandbox\Names $self, array $list = NULL):void  [public]
         method Koda\Sandbox\Names::publicStatic():void  [final static public]

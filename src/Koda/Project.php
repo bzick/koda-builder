@@ -152,6 +152,7 @@ class Project implements EntityInterface {
                 }
             }
         }
+//        drop($this);
     }
 
     /**
@@ -219,12 +220,9 @@ class Project implements EntityInterface {
             }
         }
         $functions = [];
-        foreach($this->callable as $function) {
-            if(!$function->class) {
-                $functions[] = $function->dump($tab.'    ');
-            }
+        foreach($this->functions as $function) {
+            $functions[] = $function->dump($tab.'    ');
         }
-
         $classes = [];
         foreach($this->classes as $class) {
             $classes[] = $class->dump($tab.'    ');

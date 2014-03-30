@@ -86,9 +86,14 @@ class EntityClass implements EntityInterface {
     }
 
     public function dump($tab = "") {
+
         $constants = [];
         foreach($this->constants as $const) {
             $constants[] = $const->dump($tab.'    ');
+        }
+        $properties = [];
+        foreach($this->properties as $prop) {
+            $properties[] = $prop->dump($tab.'    ');
         }
         $functions = [];
         foreach($this->methods as $method) {

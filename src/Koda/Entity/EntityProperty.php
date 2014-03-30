@@ -43,11 +43,13 @@ class EntityProperty implements EntityInterface {
         if($property->isDefault()) {
             $this->value = $property->getDeclaringClass()->getDefaultProperties()[$name];
             $this->type  = Types::getType($this->value);
+        } else {
+            $this->type  = Types::NIL;
         }
     }
 
     public function dump($tab = "") {
-        return 'prop '.$this->class->name.'::$'.$this->name.'  ['.Flags::keyword($this->flags).']';
+        return 'prop '.$this->class->name.'::$'.$this->name.'  ['.Flags::decode($this->flags).']';
     }
 
     public function __toString() {
