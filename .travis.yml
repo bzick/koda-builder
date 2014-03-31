@@ -7,12 +7,11 @@ php:
 before_script:
   - composer install --no-dev
   - cd sandbox && composer install
-  - pwd
+  - cd ~
 
 script:
-  - pwd
   - vendor/bin/phpunit
   - php sandbox/koda.php
   - cd sandbox/build && phpize && ./configure --with-koda-sandbox --enable-koda-sandbox-debug && make
-  - pwd
+  - cd ~
   - php -dextension=sandbox/build/modules/koda_sandbox.so vendor/bin/phpunit -c sandbox/phpunit.xml.dist
