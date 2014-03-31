@@ -1,9 +1,4 @@
 <?php
-/**
- * @author Ivan Shalganov <bzick@megagroup.ru>
- * @created 29.03.14 1:50
- * @copyright megagroup.ru, 2014
- */
 
 namespace Koda\Entity;
 

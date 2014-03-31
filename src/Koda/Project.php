@@ -112,6 +112,9 @@ class Project implements EntityInterface {
      * @return EntityModule
      */
     public function addDepends($module) {
+        if($module == "Core") { // Core is not dependence
+            return new EntityModule($module);
+        }
         return $this->depends[$module] = new EntityModule($module);
     }
 
@@ -152,7 +155,6 @@ class Project implements EntityInterface {
                 }
             }
         }
-//        drop($this);
     }
 
     /**

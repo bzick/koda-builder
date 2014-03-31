@@ -47,7 +47,7 @@
 #define REGISTER_CLASS_ARRAY_PROPERTY(class_entry, name, value, flags)
 
 /**
- * Return zend_class_entry by basic name
+ * Return zend_class_entry by class name
  * @param const char *class_name class name in lowercase
  * @return zend_class_entry
  **/
@@ -59,7 +59,7 @@ extern zend_class_entry *kd_get_class_entry(const char *class_name);
  * @param const char *parent_name parent class name in lowercase
  * @return zend_class_entry parent class entry
  **/
-extern zend_class_entry *kd_extend_class_by_name(zend_class_entry *ce TSRMLS_DC, const char *parent_name);
+extern zend_class_entry *kd_extend_class(zend_class_entry *ce TSRMLS_DC, const char *parent_name);
 
 /**
  * Multiple implements

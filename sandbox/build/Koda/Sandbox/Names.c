@@ -115,17 +115,12 @@ static const zend_function_entry Koda_Sandbox_Names_methods[] = {
 };
 
 /* Init class */
-PHP_MINIT_FUNCTION(Koda_Sandbox_Names) {
+PHP_MINIT_FUNCTION(init_Koda_Sandbox_Names) {
     zend_class_entry ce;
 
     /* Init class entry */
     INIT_CLASS_ENTRY(ce, "Koda\\Sandbox\\Names", Koda_Sandbox_Names_methods);
-    ce_Koda_Sandbox_Names = zend_register_internal_class_ex(&ce, NULL, "arrayobject" TSRMLS_CC);
-    if(!ce_Koda_Sandbox_Names) {
-        zend_error(E_CORE_ERROR, "koda/sandbox: class Koda\\Sandbox\\Names can't extends class ArrayObject: class ArrayObject not found");
-        return FAILURE;
-    }
-    kd_implements_class(ce_Koda_Sandbox_Names, 6, "countable", "serializable", "arrayaccess", "traversable", "iteratoraggregate", "jsonserializable");
+    ce_Koda_Sandbox_Names = zend_register_internal_class(&ce TSRMLS_CC);
 
     /* Class constants */
     /* const Koda\Sandbox\Names::FIVE = 5 */
@@ -136,14 +131,22 @@ PHP_MINIT_FUNCTION(Koda_Sandbox_Names) {
     REGISTER_CLASS_STRING_CONSTANT(ce_Koda_Sandbox_Names, "STRING_FIVE", "five");
 
     /* Class properties */
-    /* prop Koda\Sandbox\Names::$five  [public] */
+    /* prop Koda\Sandbox\Names::$five = 5 [public] */
     REGISTER_CLASS_LONG_PROPERTY(ce_Koda_Sandbox_Names, "five", 5, ZEND_ACC_PUBLIC);
-    /* prop Koda\Sandbox\Names::$float_five  [protected] */
+    /* prop Koda\Sandbox\Names::$float_five = 5.5 [protected] */
     REGISTER_CLASS_DOUBLE_PROPERTY(ce_Koda_Sandbox_Names, "float_five", 5.5, ZEND_ACC_PROTECTED);
-    /* prop Koda\Sandbox\Names::$string_five  [static private] */
+    /* prop Koda\Sandbox\Names::$string_five = 'five' [static private] */
     REGISTER_CLASS_STRING_PROPERTY(ce_Koda_Sandbox_Names, "string_five", "five", ZEND_ACC_STATIC | ZEND_ACC_PRIVATE);
 
     return SUCCESS;
+}
+
+PHP_MINIT_FUNCTION(load_Koda_Sandbox_Names) {
+    if(!kd_extend_class(ce_Koda_Sandbox_Names, "arrayobject")) {
+        zend_error(E_CORE_ERROR, "koda/sandbox: class Koda\\Sandbox\\Names can't extends class ArrayObject: class ArrayObject not found");
+        return FAILURE;
+    }
+    kd_implements_class(ce_Koda_Sandbox_Names, 1, "jsonserializable");
 }
 
 END_EXTERN_C();

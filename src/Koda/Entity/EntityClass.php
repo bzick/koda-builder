@@ -53,9 +53,17 @@ class EntityClass implements EntityInterface {
         $this->cname   = str_replace('\\', '_', $class);
         $this->escaped = addslashes($class);
         $this->line    = $line;
-        $this->interfaces = $ref->getInterfaces();
-        $this->parent     = $ref->getParentClass();
+//        $this->interfaces = $ref->getInterfaces();
+//        $this->parent     = $ref->getParentClass();
         $this->extension  = $ref->getExtension();
+    }
+
+    public function setParent($parent) {
+        $this->parent = new \ReflectionClass($parent);
+    }
+
+    public function addInterface($interface) {
+        $this->interfaces[$interface] = new \ReflectionClass($interface);
     }
 
     public function setAliases($aliases) {
@@ -106,9 +114,18 @@ class EntityClass implements EntityInterface {
         return "class {$this->name} {\n".
         "$tab    parent: {$this->parent->name}\n".
         "$tab    interfaces: ".implode(", ", array_keys($this->interfaces))."\n".
+        "$tab    line: {$this->line[0]}:{$this->line[1]}\n".
         ($constants  ? "\n$tab    ".implode("\n$tab    ", $constants)."\n" : "").
         ($properties ? "\n$tab    ".implode("\n$tab    ", $properties)."\n": "").
         ($functions  ? "\n$tab    ".implode("\n$tab    ", $functions)."\n" : "").
         "\n{$tab}}";
+    }
+
+    public function quote($filter = null) {
+        if($filter) {
+            return '"'.call_user_func($filter, $this->escaped).'"';
+        } else {
+            return '"'.$this->escaped.'"';
+        }
     }
 }

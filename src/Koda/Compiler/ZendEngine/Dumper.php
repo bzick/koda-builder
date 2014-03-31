@@ -88,6 +88,11 @@ class Dumper {
     }
 
 
+    /**
+     * m4 config for unix `configure`
+     * @see http://docs.php.net/manual/en/internals2.buildsys.configunix.php
+     * @return string
+     */
     public function m4() {
         $project = $this->project;
         $sources = implode(" ", $this->sources);
@@ -110,6 +115,10 @@ M4;
         return ob_get_clean();
     }
 
+    /**
+     * @see http://www.php.net/manual/en/internals2.buildsys.configwin.php
+     * @return string
+     */
     public function w32() {
         ob_start();
         return ob_get_clean();
@@ -293,19 +302,25 @@ REGISTER_MODULE;
             $constants = "";
         }
         if($this->project->classes) {
-            $inits = ['/* Constants */'];
+            $inits = ['/* Classes */'];
+            $loads = [];
             foreach($this->project->classes as $class) {
-                $inits[] = "STARTUP_MODULE({$class->cname}); // init {$class->name}";
+                $inits[] = "STARTUP_MODULE(init_{$class->cname}); // init {$class->name}";
+                $loads[] = "STARTUP_MODULE(load_{$class->cname}); // load {$class->name}";
             }
             $inits = implode("\n    ", $inits);
+            $loads = implode("\n    ", $loads);
         } else {
-            $inits = "";
+            $inits = $loads = "";
         }
         echo <<<INIT_MODULE
 /* Init module */
 PHP_MINIT_FUNCTION({$this->code}) {
     {$constants}
+
     {$inits}
+    {$loads}
+
     return SUCCESS;
 }
 
@@ -319,6 +334,7 @@ PHP_MINFO_FUNCTION({$this->code}) {
     php_info_print_table_header(2, "{$this->project->name} support", "enabled");
     php_info_print_table_header(2, "{$this->project->name} version", "{$this->project->version}");
     php_info_print_table_header(2, "{$this->project->name} with Koda", "{$koda_version}");
+    php_info_print_table_header(2, "{$this->project->name} with debug", "yes");
     php_info_print_table_end();
 
 }
@@ -544,29 +560,31 @@ REGISTER_METHODS;
         } else {
             $properties = "";
         }
-        $register = [];
+        $register = $inherit = [];
         if($class->flags & Flags::IS_INTERFACE) {
             $register[] = "ce_{$name} = zend_register_internal_interface(&ce TSRMLS_CC);";
-        } elseif($class->parent) {
-            $register[] = "ce_{$name} = zend_register_internal_class_ex(&ce, NULL, \"".strtolower($class->parent->escaped)."\" TSRMLS_CC);";
-            $register[] = "if(!ce_{$name}) {";
-            $register[] = "    zend_error(E_CORE_ERROR, \"{$this->project->name}: class {$class->escaped} can't extends class {$class->parent->escaped}: class {$class->parent->escaped} not found\");";
-            $register[] = "    return FAILURE;";
-            $register[] = "}";
         } else {
             $register[] = "ce_{$name} = zend_register_internal_class(&ce TSRMLS_CC);";
-            $register[] = "memcpy(&handlers_{$name}, zend_get_std_object_handlers(), sizeof(zend_object_handlers));";
+            if($class->parent) {
+                $inherit[] = "if(!kd_extend_class(ce_{$name}, {$class->parent->quote('strtolower')})) {";
+                $inherit[] = "    zend_error(E_CORE_ERROR, \"{$this->project->name}: class {$class->escaped} can't extends class {$class->parent->escaped}: class {$class->parent->escaped} not found\");";
+                $inherit[] = "    return FAILURE;";
+                $inherit[] = "}";
+            } else {
+                $register[] = "memcpy(&handlers_{$name}, zend_get_std_object_handlers(), sizeof(zend_object_handlers));";
+            }
         }
         if($class->interfaces) {
             $interfaces = implode('", "', array_map('strtolower', array_map('addslashes', array_keys($class->interfaces))));
-            $register[] = "kd_implements_class(ce_{$name}, ".count($class->interfaces).", \"{$interfaces}\");";
+            $inherit[] = "kd_implements_class(ce_{$name}, ".count($class->interfaces).", \"{$interfaces}\");";
         }
         $register = implode("\n    ", $register);
+        $inherit = implode("\n    ", $inherit);
 
         echo <<<REGISTER_CLASS
 
 /* Init class */
-PHP_MINIT_FUNCTION({$name}) {
+PHP_MINIT_FUNCTION(init_{$name}) {
     zend_class_entry ce;
 
     /* Init class entry */
@@ -576,6 +594,10 @@ PHP_MINIT_FUNCTION({$name}) {
     {$constants}
     {$properties}
     return SUCCESS;
+}
+
+PHP_MINIT_FUNCTION(load_{$name}) {
+    {$inherit}
 }
 
 END_EXTERN_C();

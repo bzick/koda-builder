@@ -1,9 +1,4 @@
 <?php
-/**
- * @author Ivan Shalganov <bzick@megagroup.ru>
- * @created 26.03.14 21:13
- * @copyright megagroup.ru, 2014
- */
 
 namespace Koda\Entity;
 
@@ -49,7 +44,7 @@ class EntityProperty implements EntityInterface {
     }
 
     public function dump($tab = "") {
-        return 'prop '.$this->class->name.'::$'.$this->name.'  ['.Flags::decode($this->flags).']';
+        return 'prop '.$this->class->name.'::$'.$this->name.' = '.var_export($this->value, true).' ['.Flags::decode($this->flags).']';
     }
 
     public function __toString() {

@@ -38,7 +38,6 @@ static const zend_module_dep koda_sandbox_depends[] = {
     ZEND_MOD_REQUIRED("tokenizer")
     ZEND_MOD_OPTIONAL("sockets")
     ZEND_MOD_REQUIRED("SPL")
-    ZEND_MOD_REQUIRED("Core")
     ZEND_MOD_REQUIRED("json")
     { NULL, NULL, NULL}
 };
@@ -67,8 +66,11 @@ PHP_MINIT_FUNCTION(koda_sandbox) {
     REGISTER_NS_DOUBLE_CONSTANT("Koda\\Sandbox", "FLOAT_FIVE", 5.5, CONST_CS | CONST_PERSISTENT);
     /* const Koda\Sandbox\STRING_FIVE = 'five' */
     REGISTER_NS_STRING_CONSTANT("Koda\\Sandbox", "STRING_FIVE", "five", CONST_CS | CONST_PERSISTENT);
-    /* Constants */
-    STARTUP_MODULE(Koda_Sandbox_Names); // init Koda\Sandbox\Names
+
+    /* Classes */
+    STARTUP_MODULE(init_Koda_Sandbox_Names); // init Koda\Sandbox\Names
+    STARTUP_MODULE(load_Koda_Sandbox_Names); // load Koda\Sandbox\Names
+
     return SUCCESS;
 }
 
@@ -79,6 +81,7 @@ PHP_MINFO_FUNCTION(koda_sandbox) {
     php_info_print_table_header(2, "koda/sandbox support", "enabled");
     php_info_print_table_header(2, "koda/sandbox version", "0.3");
     php_info_print_table_header(2, "koda/sandbox with Koda", "0.1");
+    php_info_print_table_header(2, "koda/sandbox with debug", "yes");
     php_info_print_table_end();
 
 }

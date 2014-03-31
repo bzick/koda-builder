@@ -10,15 +10,16 @@ Project koda/sandbox {
 
     class Koda\Sandbox\Names {
         parent: ArrayObject
-        interfaces: Countable, Serializable, ArrayAccess, Traversable, IteratorAggregate, JsonSerializable
+        interfaces: JsonSerializable
+        line: /Volumes/Data/Dev/koda/sandbox/src/Names.php:22
 
         const Koda\Sandbox\Names::FIVE = 5
         const Koda\Sandbox\Names::FLOAT_FIVE = 5.5
         const Koda\Sandbox\Names::STRING_FIVE = 'five'
 
-        prop Koda\Sandbox\Names::$five  [public]
-        prop Koda\Sandbox\Names::$float_five  [protected]
-        prop Koda\Sandbox\Names::$string_five  [static private]
+        prop Koda\Sandbox\Names::$five = 5 [public]
+        prop Koda\Sandbox\Names::$float_five = 5.5 [protected]
+        prop Koda\Sandbox\Names::$string_five = 'five' [static private]
 
         method Koda\Sandbox\Names::__construct(Koda\Sandbox\Names $self, array $list = NULL):void  [public]
         method Koda\Sandbox\Names::publicStatic():void  [final static public]

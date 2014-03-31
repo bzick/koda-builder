@@ -3,14 +3,14 @@
 
 zend_class_entry *kd_get_class_entry(const char *class_name) {
     zend_class_entry **ce;
-    if (zend_hash_find(CG(class_table), class_name, strlen(class_name)+1, (void **) &ce)==FAILURE) {
+    if (zend_hash_find(CG(class_table), class_name, strlen(class_name) + 1, (void **) &ce)==FAILURE) {
         return NULL;
     } else {
         return *ce;
     }
 }
 
-zend_class_entry *kd_extend_class_by_name(zend_class_entry *ce TSRMLS_DC, const char *parent_name) {
+zend_class_entry *kd_extend_class(zend_class_entry *ce TSRMLS_DC, const char *parent_name) {
     zend_class_entry *parent_ce = kd_get_class_entry(parent_name);
     if(parent_ce) {
         zend_do_inheritance(ce, parent_ce TSRMLS_CC);

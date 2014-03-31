@@ -20,7 +20,8 @@
 	},
 	"config": {
 		"koda": {
-			"version": "echo '0.3'"
+			"version": "echo '0.3'",
+			"testing": "vendor/bin/phpunit"
 		}
 	}
 }

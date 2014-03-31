@@ -75,6 +75,33 @@ class EntityFile {
                 $tokens->forwardTo(T_STRING);
                 $name = $tokens->current();
                 $class = new EntityClass($_ns.$name, $aliases, [$this, $tokens->getLine()]);
+                $tokens->next();
+                if($tokens->is(T_EXTENDS)) { // process 'extends' keyword
+                    $tokens->next();
+                    $root = $tokens->is(T_NS_SEPARATOR);
+                    $parent = $this->_parseName($tokens);
+                    if($root) { // extends from root namespace
+                        $class->setParent($parent);
+                    } elseif(isset($aliases[$parent])) {
+                        $class->setParent($aliases[$parent]);
+                    } else {
+                        $class->setParent($_ns.$parent);
+                    }
+                }
+                if($tokens->is(T_IMPLEMENTS)) { // process 'implements' keyword
+                    do {
+                        $tokens->next();
+                        $root = $tokens->is(T_NS_SEPARATOR);
+                        $parent = $this->_parseName($tokens);
+                        if($root) { // extends from root namespace
+                            $class->addInterface($parent);
+                        } elseif(isset($aliases[$parent])) {
+                            $class->addInterface($aliases[$parent]);
+                        } else {
+                            $class->addInterface($_ns.$parent);
+                        }
+                    } while($tokens->is(','));
+                }
                 $tokens->forwardTo('{')->next();
                 while($tokens->forwardTo(T_CONST, T_FUNCTION, '{', '}', T_VARIABLE) && $tokens->valid()) {
                     switch($tokens->key()) {
@@ -110,6 +137,10 @@ class EntityFile {
         if($brackets) {
             $tokens->need('}');
         }
+    }
+
+    public function __toString() {
+        return $this->path;
     }
 
 
