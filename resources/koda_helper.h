@@ -3,6 +3,10 @@
 
 //BEGIN_EXTERN_C();
 
+#ifdef ZTS
+#include "TSRM.h"
+#endif
+
 #define STARTUP_MODULE(module) \
     ZEND_MODULE_STARTUP_N(module)(INIT_FUNC_ARGS_PASSTHRU)
 

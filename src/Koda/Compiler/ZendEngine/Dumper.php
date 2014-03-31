@@ -162,10 +162,6 @@ extern zend_module_entry {$this->code}_module_entry;
 
 #define PHP_{$this->CODE}_VERSION "{$this->project->version}"
 
-#ifdef ZTS
-#  include "TSRM.h"
-#endif
-
 $functions
 /* Std module functions */
 PHP_MINIT_FUNCTION({$this->code});
