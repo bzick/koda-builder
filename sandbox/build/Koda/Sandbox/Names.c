@@ -141,12 +141,14 @@ PHP_MINIT_FUNCTION(init_Koda_Sandbox_Names) {
     return SUCCESS;
 }
 
+/* Extending and implementing */
 PHP_MINIT_FUNCTION(load_Koda_Sandbox_Names) {
     if(!kd_extend_class(ce_Koda_Sandbox_Names, "arrayobject")) {
         zend_error(E_CORE_ERROR, "koda/sandbox: class Koda\\Sandbox\\Names can't extends class ArrayObject: class ArrayObject not found");
         return FAILURE;
     }
     kd_implements_class(ce_Koda_Sandbox_Names, 1, "jsonserializable");
+    return SUCCESS;
 }
 
 END_EXTERN_C();

@@ -97,12 +97,15 @@ class Dumper {
         $project = $this->project;
         $sources = implode(" ", $this->sources);
         $date = date("Y-m-d H:i:s");
+        $m4_alias = str_replace('_', '-', $this->code);
         ob_start();
         echo <<<M4
 dnl Koda compiler, {$date}.
 
 PHP_ARG_WITH({$this->code}, for {$project->name} support,
-[  --with-{$this->code}             Include {$project->name} support])
+[  --with-{$m4_alias}             Include {$project->name} support])
+PHP_ARG_ENABLE({$m4_alias}-debug, whether to enable debugging support in {$project->name},
+[  --enable-{$m4_alias}-debug     Enable debugging support in {$project->name}], no, no)
 
 CFLAGS="\$CFLAGS -Wall -g3 -ggdb -O0"
 
@@ -133,7 +136,8 @@ M4;
         if($this->project->classes) {
             $init_classes = [];
             foreach($this->project->classes as $class) {
-                $init_classes[] =  "PHP_MINIT_FUNCTION({$class->cname}); // init class {$class->name}";
+                $init_classes[] =  "PHP_MINIT_FUNCTION(init_{$class->cname}); // init class {$class->name}";
+                $init_classes[] =  "PHP_MINIT_FUNCTION(load_{$class->cname}); // load class {$class->name}";
             }
             $init_classes = implode("\n", $init_classes)."\n";
         } else {
@@ -596,8 +600,10 @@ PHP_MINIT_FUNCTION(init_{$name}) {
     return SUCCESS;
 }
 
+/* Extending and implementing */
 PHP_MINIT_FUNCTION(load_{$name}) {
     {$inherit}
+    return SUCCESS;
 }
 
 END_EXTERN_C();

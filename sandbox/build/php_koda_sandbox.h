@@ -16,7 +16,8 @@ PHP_FUNCTION(php_simple_function);
 
 /* Std module functions */
 PHP_MINIT_FUNCTION(koda_sandbox);
-PHP_MINIT_FUNCTION(Koda_Sandbox_Names); // init class Koda\Sandbox\Names
+PHP_MINIT_FUNCTION(init_Koda_Sandbox_Names); // init class Koda\Sandbox\Names
+PHP_MINIT_FUNCTION(load_Koda_Sandbox_Names); // load class Koda\Sandbox\Names
 
 PHP_MINFO_FUNCTION(koda_sandbox);
 #endif	/* PHP_KODA_SANDBOX_H */
