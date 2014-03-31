@@ -566,7 +566,7 @@ REGISTER_METHODS;
         } else {
             $register[] = "ce_{$name} = zend_register_internal_class(&ce TSRMLS_CC);";
             if($class->parent) {
-                $inherit[] = "if(!kd_extend_class(ce_{$name}, {$class->parent->quote('strtolower')})) {";
+                $inherit[] = "if(!kd_extend_class(ce_{$name} TSRMLS_CC, {$class->parent->quote('strtolower')})) {";
                 $inherit[] = "    zend_error(E_CORE_ERROR, \"{$this->project->name}: class {$class->escaped} can't extends class {$class->parent->escaped}: class {$class->parent->escaped} not found\");";
                 $inherit[] = "    return FAILURE;";
                 $inherit[] = "}";
@@ -576,7 +576,7 @@ REGISTER_METHODS;
         }
         if($class->interfaces) {
             $interfaces = implode('", "', array_map('strtolower', array_map('addslashes', array_keys($class->interfaces))));
-            $inherit[] = "kd_implements_class(ce_{$name}, ".count($class->interfaces).", \"{$interfaces}\");";
+            $inherit[] = "kd_implements_class(ce_{$name} TSRMLS_CC, ".count($class->interfaces).", \"{$interfaces}\");";
         }
         $register = implode("\n    ", $register);
         $inherit = implode("\n    ", $inherit);

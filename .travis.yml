@@ -5,13 +5,7 @@ php:
   - 5.5
 
 before_script:
-  - composer install --no-dev
-  - cd sandbox && composer install
-  - cd ..
+  - .travis/install.sh
 
 script:
-  - vendor/bin/phpunit
-  - php sandbox/koda.php
-  - cd sandbox/build && phpize && ./configure --with-koda-sandbox --enable-koda-sandbox-debug && make
-  - cd ../..
-  - php -dextension=sandbox/build/modules/koda_sandbox.so vendor/bin/phpunit -c sandbox/phpunit.xml.dist
+  - .travis/test.sh
