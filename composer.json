@@ -1,6 +1,6 @@
 {
     "name": "koda/koda",
-    "description": "PHP to Extension converter",
+    "description": "PHP extension generator",
     "license": "MIT",
     "authors": [
         {
