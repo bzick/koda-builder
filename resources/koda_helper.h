@@ -55,7 +55,7 @@
  * @param const char *class_name class name in lowercase
  * @return zend_class_entry
  **/
-extern zend_class_entry *kd_get_class_entry(const char *class_name);
+extern zend_class_entry *kd_get_class_entry(const char *class_name TSRMLS_DC);
 
 /**
  * Extends class by parent's name
