@@ -30,9 +30,6 @@ config*
 autom4te.cache
 .libs/
 /include/
-composer.lock
-composer.phar
-vendor
 /compile
 /depcomp
 /info

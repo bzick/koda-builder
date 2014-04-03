@@ -1,10 +1,18 @@
 #ifndef PHP_KODA_HELPER_H
 #define PHP_KODA_HELPER_H
 
-//BEGIN_EXTERN_C();
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #ifdef ZTS
 #include "TSRM.h"
+#endif
+
+#ifdef KODA_DEBUG
+#define KDBG(message) zend_error(E_NOTICE, "Ext: %s", message)
+#else
+#define KDBG(message)
 #endif
 
 #define STARTUP_MODULE(module) \
@@ -73,7 +81,5 @@ extern zend_class_entry *kd_extend_class(zend_class_entry *ce TSRMLS_DC, const c
  * @return int FAILURE or SUCCESS
  **/
 extern int kd_implements_class(zend_class_entry *ce TSRMLS_DC,  int num_interfaces, ...);
-
-//END_EXTERN_C();
 
 #endif	/* PHP_KODA_HELPER_H */

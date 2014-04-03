@@ -2,6 +2,10 @@
 
 namespace Koda;
 
+use Koda\Entity\EntityFunction;
+use PhpParser\Node;
+use PhpParser\NodeDumper;
+
 class ToolKit {
 
     public static $tab = "    ";
@@ -23,6 +27,12 @@ class ToolKit {
             case "object":
                 if($item instanceof EntityInterface) {
                     return $item->dump($tab);
+                } elseif($item instanceof EntityFunction) {
+                    $nodeDumper = new NodeDumper;
+                    return $item->dump($tab)."{\n".$nodeDumper->dump($item->stmts)."\n}";
+                } elseif($item instanceof Node) {
+                    $nodeDumper = new NodeDumper;
+                    return $nodeDumper->dump($item);
                 } elseif(method_exists($item, '__toString')) {
                     return $item->__toString();
                 } else {

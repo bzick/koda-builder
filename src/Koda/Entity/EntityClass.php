@@ -13,9 +13,18 @@ class EntityClass implements EntityInterface {
     /**
      * @var EntityClass[]
      */
+    public $parents;
+    /**
+     * @var EntityClass[]
+     */
     public $interfaces = [];
+    /**
+     * @var EntityClass[]
+     */
     public $traits = [];
-
+    /**
+     * @var int
+     */
     public $flags = 0;
     /**
      * @var EntityProperty[]
@@ -29,19 +38,37 @@ class EntityClass implements EntityInterface {
      * @var EntityConstant[]
      */
     public $constants = [];
-
     /**
      * @var \ReflectionExtension
      */
     public $extension;
-
+    /**
+     * @var string[]
+     */
     public $aliases;
-
+    /**
+     * @var string
+     */
     public $name;
+    /**
+     * @var string
+     */
     public $short;
+    /**
+     * @var string
+     */
     public $ns;
+    /**
+     * @var mixed
+     */
     public $cname;
+    /**
+     * @var string
+     */
     public $escaped;
+    /**
+     * @var
+     */
     public $ref;
 
     public function __construct($class, $aliases, array $line) {
@@ -53,13 +80,49 @@ class EntityClass implements EntityInterface {
         $this->cname   = str_replace('\\', '_', $class);
         $this->escaped = addslashes($class);
         $this->line    = $line;
-//        $this->interfaces = $ref->getInterfaces();
-//        $this->parent     = $ref->getParentClass();
         $this->extension  = $ref->getExtension();
+        if($ref->isInterface()) {
+            $this->flags = Flags::IS_INTERFACE;
+        } elseif($ref->isTrait()) {
+            $this->flags = Flags::IS_TRAIT;
+        } else {
+            $this->flags = Flags::IS_CLASS;
+        }
+        if($ref->isAbstract()) {
+            $this->flags |= Flags::IS_ABSTRACT;
+        } elseif($ref->isFinal()) {
+            $this->flags |= Flags::IS_FINAL;
+        }
     }
 
-    public function setParent($parent) {
-        $this->parent = new \ReflectionClass($parent);
+    public function isInterface() {
+        return $this->flags & Flags::IS_INTERFACE;
+    }
+
+    public function isTrait() {
+        return $this->flags & Flags::IS_TRAIT;
+    }
+
+    public function isClass() {
+        return $this->flags & Flags::IS_CLASS;
+    }
+
+    public function isFinal() {
+        return $this->flags & Flags::IS_FINAL;
+    }
+
+    public function isAbstract() {
+        return $this->flags & Flags::IS_ABSTRACT;
+    }
+
+    public function setParent($parent, $multiple = false) {
+        if($multiple) {
+            $this->parents[] = new \ReflectionClass($parent);
+        } elseif($this->parent) {
+            throw new \LogicException("Parent {$this->parent} already set for {$this}");
+        } else {
+            $this->parent = new \ReflectionClass($parent);
+        }
     }
 
     public function addInterface($interface) {
@@ -90,35 +153,40 @@ class EntityClass implements EntityInterface {
     }
 
     public function __toString() {
-        return "class {$this->name}";
+        return Flags::decode($this->flags & Flags::CLASS_TYPES)." {$this->name}";
+    }
+
+    public function getEscapedName() {
+        return addslashes($this->__toString());
     }
 
     public function dump($tab = "") {
+        $inf = [
+            "line: {$this->line[0]}:{$this->line[1]}"
+        ];
+        if($this->parent) {
+            $inf[] = "parent: {$this->parent->name}";
+        }
+        if($this->parents) {
+            $inf[] = "parents: ".implode(", ", array_keys($this->parents));
+        }
+        if($this->interfaces) {
+            $inf[] = "interfaces: ".implode(", ", array_keys($this->interfaces));
+        }
 
-        $constants = [];
-        foreach($this->constants as $const) {
-            $constants[] = $const->dump($tab.'    ');
+        foreach(['constants', 'properties', 'methods'] as $entities) {
+            if($this->$entities) {
+                $inf[] = "";
+            }
+            foreach($this->$entities as $entity) {
+                /* @var EntityInterface $entity */
+                $inf[] = $entity->dump();
+            }
         }
-        $properties = [];
-        foreach($this->properties as $prop) {
-            $properties[] = $prop->dump($tab.'    ');
-        }
-        $functions = [];
-        foreach($this->methods as $method) {
-            $functions[] = $method->dump($tab.'    ');
-        }
-        $properties = [];
-        foreach($this->properties as $property) {
-            $properties[] = $property->dump($tab.'    ');
-        }
-        return "class {$this->name} {\n".
-        "$tab    parent: {$this->parent->name}\n".
-        "$tab    interfaces: ".implode(", ", array_keys($this->interfaces))."\n".
-        "$tab    line: {$this->line[0]}:{$this->line[1]}\n".
-        ($constants  ? "\n$tab    ".implode("\n$tab    ", $constants)."\n" : "").
-        ($properties ? "\n$tab    ".implode("\n$tab    ", $properties)."\n": "").
-        ($functions  ? "\n$tab    ".implode("\n$tab    ", $functions)."\n" : "").
-        "\n{$tab}}";
+        $access = Flags::decode($this->flags & ~Flags::CLASS_TYPES);
+
+        return Flags::decode($this->flags & Flags::CLASS_TYPES)." {$this->name} ".($access ? "[$access] " : "").
+        "{\n$tab    ".implode("\n$tab    ", $inf)."\n$tab}\n";
     }
 
     public function quote($filter = null) {

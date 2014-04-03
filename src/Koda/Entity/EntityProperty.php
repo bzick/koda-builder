@@ -37,7 +37,7 @@ class EntityProperty implements EntityInterface {
 
         if($property->isDefault()) {
             $this->value = $property->getDeclaringClass()->getDefaultProperties()[$name];
-            $this->type  = Types::getType($this->value);
+            $this->type  = Types::detectType($this->value);
         } else {
             $this->type  = Types::NIL;
         }

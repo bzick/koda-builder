@@ -6,21 +6,22 @@ Project koda/sandbox {
     const Koda\Sandbox\FLOAT_FIVE = 5.5
     const Koda\Sandbox\STRING_FIVE = 'five'
 
-    function Koda\Sandbox\simple_function(string $x, string $y = 5):bool
+    function Koda\Sandbox\simple_multi(double $x, int $y = 5):bool
+    function KodaSandbox\simple_div(double $x, int $y = 5, boolean $allow_zero = false):bool
 
     class Koda\Sandbox\Names {
+        line: /Volumes/Data/Dev/koda/sandbox/src/Names.php:22
         parent: ArrayObject
         interfaces: JsonSerializable
-        line: /Volumes/Data/Dev/koda/sandbox/src/Names.php:22
-
+        
         const Koda\Sandbox\Names::FIVE = 5
         const Koda\Sandbox\Names::FLOAT_FIVE = 5.5
         const Koda\Sandbox\Names::STRING_FIVE = 'five'
-
+        
         prop Koda\Sandbox\Names::$five = 5 [public]
         prop Koda\Sandbox\Names::$float_five = 5.5 [protected]
         prop Koda\Sandbox\Names::$string_five = 'five' [static private]
-
+        
         method Koda\Sandbox\Names::__construct(Koda\Sandbox\Names $self, array $list = NULL):void  [public]
         method Koda\Sandbox\Names::publicStatic():void  [final static public]
         method Koda\Sandbox\Names::privateStatic():void  [static private]
@@ -31,7 +32,20 @@ Project koda/sandbox {
         method Koda\Sandbox\Names::__clone():void  [public]
         method Koda\Sandbox\Names::__destruct():void  [public]
         method Koda\Sandbox\Names::jsonSerialize():void  [public]
-
     }
+
+    interface Koda\Sandbox\NamesInterface [abstract] {
+        line: /Volumes/Data/Dev/koda/sandbox/src/Names.php:74
+        parents: 0, 1
+        
+        method Koda\Sandbox\NamesInterface::gonnaDo():void  [abstract public]
+    }
+
+    class KodaSandbox\Names [abstract] {
+        line: /Volumes/Data/Dev/koda/sandbox/src/Names.php:93
+        
+        method KodaSandbox\Names::abstractMethod():void  [abstract public]
+    }
+
 
 }

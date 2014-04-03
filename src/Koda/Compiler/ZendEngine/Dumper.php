@@ -107,7 +107,14 @@ PHP_ARG_WITH({$this->code}, for {$project->name} support,
 PHP_ARG_ENABLE({$m4_alias}-debug, whether to enable debugging support in {$project->name},
 [  --enable-{$m4_alias}-debug     Enable debugging support in {$project->name}], no, no)
 
-CFLAGS="\$CFLAGS -Wall -g3 -ggdb -O0"
+if test "\$PHP_{$this->CODE}_DEBUG" != "no"; then
+    AC_DEFINE({$this->CODE}_DEBUG, 1, [Include debugging support in {$project->name}])
+    AC_DEFINE(KODA_DEBUG, 1, [Include koda debugging])
+    CFLAGS="\$CFLAGS -Wall -g3 -ggdb -O0"
+else
+dnl todo: remove this
+    CFLAGS="\$CFLAGS -Wall -g3 -ggdb -O0"
+fi
 
 if test "\$PHP_{$this->CODE}" != "no"; then
     PHP_ADD_INCLUDE(.)
@@ -335,6 +342,7 @@ PHP_MINFO_FUNCTION({$this->code}) {
     php_info_print_table_header(2, "{$this->project->name} version", "{$this->project->version}");
     php_info_print_table_header(2, "{$this->project->name} with Koda", "{$koda_version}");
     php_info_print_table_header(2, "{$this->project->name} with debug", "yes");
+    php_info_print_table_header(2, "{$this->project->name} optimization", "none");
     php_info_print_table_end();
 
 }
@@ -504,7 +512,11 @@ TOP;
         if($class->methods) {
             $method_table = [];
             foreach($class->methods as $method) {
-                $method_table[] = "ZEND_ME({$name}, {$method->short}, arginfo_{$method->short}, {$this->_meFlags($method)})";
+                if($method->isAbstract()) {
+                    $method_table[] = "ZEND_FENTRY({$method->short}, NULL, arginfo_{$method->short}, {$this->_meFlags($method)})";
+                } else {
+                    $method_table[] = "ZEND_ME({$name}, {$method->short}, arginfo_{$method->short}, {$this->_meFlags($method)})";
+                }
                 if($method->arguments) {
                     $arginfo     = [];
                     foreach($method->arguments as $argument) {
@@ -514,12 +526,18 @@ TOP;
                 } else {
                     $arginfo = "";
                 }
-                echo <<<METHOD
+                if(!$method->isAbstract()) {
+
+                    echo <<<METHOD
 
 /* proto {$method->dump()} */
 PHP_METHOD({$name}, {$method->short}) {
     // coming soon
 }
+
+METHOD;
+                }
+                    echo <<<METHOD
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_{$method->short}, 0, {$method->isReturnRef()}, {$method->required}){$arginfo}
 ZEND_END_ARG_INFO();
@@ -546,7 +564,7 @@ REGISTER_METHODS;
                 $constants[] = "/* {$constant->dump()} */";
                 $constants[] = $this->_constant($constant);
             }
-            $constants = implode("\n    ", $constants)."\n";
+            $constants = "\n".implode("\n    ", $constants)."\n";
         } else {
             $constants = "";
         }
@@ -556,22 +574,39 @@ REGISTER_METHODS;
                 $properties[] = "/* {$prop->dump()} */";
                 $properties[] = $this->_property($prop);
             }
-            $properties = implode("\n    ", $properties)."\n";
+            $properties = "\n".implode("\n    ", $properties)."\n";
         } else {
             $properties = "";
         }
         $register = $inherit = [];
         if($class->flags & Flags::IS_INTERFACE) {
             $register[] = "ce_{$name} = zend_register_internal_interface(&ce TSRMLS_CC);";
+            if($class->parents) {
+                foreach($class->parents as $parent) {
+                    $inherit[] = "if(!kd_extend_class(ce_{$name} TSRMLS_CC, {$parent->quote('strtolower')})) {";
+                    $inherit[] = "    zend_error(E_CORE_ERROR, \"{$this->project->name}: {$class->getEscapedName()} can't extends {$parent->getEscapedName()}\");";
+                    $inherit[] = "    return FAILURE;";
+                    $inherit[] = "}";
+                }
+            }
         } else {
             $register[] = "ce_{$name} = zend_register_internal_class(&ce TSRMLS_CC);";
             if($class->parent) {
                 $inherit[] = "if(!kd_extend_class(ce_{$name} TSRMLS_CC, {$class->parent->quote('strtolower')})) {";
-                $inherit[] = "    zend_error(E_CORE_ERROR, \"{$this->project->name}: class {$class->escaped} can't extends class {$class->parent->escaped}: class {$class->parent->escaped} not found\");";
+                $inherit[] = "    zend_error(E_CORE_ERROR, \"{$this->project->name}: {$class->getEscapedName()} can't extends {$class->parent->getEscapedName()}\");";
                 $inherit[] = "    return FAILURE;";
                 $inherit[] = "}";
             } else {
                 $register[] = "memcpy(&handlers_{$name}, zend_get_std_object_handlers(), sizeof(zend_object_handlers));";
+            }
+            if($class->flags & Flags::IS_ABSTRACT) {
+                $register[] = "ce_{$name}->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;";
+            }
+            if($class->flags & Flags::IS_ABSTRACT_IMPLICIT) {
+                $register[] = "ce_{$name}->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;";
+            }
+            if($class->flags & Flags::IS_FINAL) {
+                $register[] = "ce_{$name}->ce_flags |= ZEND_ACC_FINAL_CLASS;";
             }
         }
         if($class->interfaces) {
@@ -590,7 +625,6 @@ PHP_MINIT_FUNCTION(init_{$name}) {
     /* Init class entry */
     INIT_CLASS_ENTRY(ce, "{$escaped}", {$name}_methods);
     {$register}
-
     {$constants}
     {$properties}
     return SUCCESS;
@@ -637,7 +671,11 @@ REGISTER_CLASS;
                 $flags[] = $flag;
             }
         }
-        return implode(" | ", $flags);
+        if($flags) {
+            return implode(" | ", $flags);
+        } else{
+            return '0';
+        }
     }
 
 } 

@@ -18,6 +18,7 @@ class Types {
 
     public static $codes = [
         "mixed" => self::MIXED,
+        "bool" => self::BOOLEAN,
         "boolean" => self::BOOLEAN,
         "int" => self::INT,
         "integer" => self::INT,
@@ -45,11 +46,15 @@ class Types {
         self::CALLBACK => "callable",
     ];
 
-    public static function getType($value) {
-        if(isset(self::$codes[gettype($value)])) {
-            return self::$codes[gettype($value)];
+    public static function detectType($value) {
+        return self::getType(gettype($value));
+    }
+
+    public static function getType($code) {
+        if(isset(self::$codes[$code])) {
+            return self::$codes[$code];
         } else {
-            throw new \LogicException("Unknown code type");
+            throw new \LogicException("Unknown code type '$code'");
         }
     }
 

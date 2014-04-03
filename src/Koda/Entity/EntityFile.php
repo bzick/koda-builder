@@ -15,7 +15,7 @@ class EntityFile {
     ];
 
     /**
-     * @var \SplFileInfo
+     * @var string
      */
     public $path;
 
@@ -31,21 +31,28 @@ class EntityFile {
     public function scan() {
         $ns         = "";
         $_ns        = "";
-        $brackets   = 0;
+        $ns_bracket = false;
         $aliases    = [];
         $tokens = new Tokenizer(FS::get($this->path));
-        if($tokens->is(T_NAMESPACE)) {
-            $ns = $this->_parseName($tokens->next());
-            if($tokens->is('{')) {
-                $tokens->skip();
-                $brackets++;
-            } else {
-                $tokens->skipIf(';');
-            }
-            $_ns = $ns.'\\';
-        }
         while($tokens->valid()) {
-            if($tokens->is(T_USE)) {
+            if($tokens->is(T_NAMESPACE)) {
+                $ns         = "";
+                $_ns        = "";
+                $tokens->next();
+                if($tokens->is(T_STRING)) {
+                    $ns = $this->_parseName($tokens);
+                    if($tokens->is('{')) {
+                        $tokens->skip();
+                        $ns_bracket = true;
+                    } else {
+                        $tokens->skipIf(';');
+                    }
+                    $_ns = $ns.'\\';
+                } elseif($tokens->is('{')) {
+                    $ns_bracket = true;
+                    $tokens->next();
+                }
+            } elseif($tokens->is(T_USE)) {
                 do {
                     $tokens->next();
                     $name = $this->_parseName($tokens);
@@ -77,16 +84,18 @@ class EntityFile {
                 $class = new EntityClass($_ns.$name, $aliases, [$this, $tokens->getLine()]);
                 $tokens->next();
                 if($tokens->is(T_EXTENDS)) { // process 'extends' keyword
-                    $tokens->next();
-                    $root = $tokens->is(T_NS_SEPARATOR);
-                    $parent = $this->_parseName($tokens);
-                    if($root) { // extends from root namespace
-                        $class->setParent($parent);
-                    } elseif(isset($aliases[$parent])) {
-                        $class->setParent($aliases[$parent]);
-                    } else {
-                        $class->setParent($_ns.$parent);
-                    }
+                    do {
+                        $tokens->next();
+                        $root = $tokens->is(T_NS_SEPARATOR);
+                        $parent = $this->_parseName($tokens);
+                        if($root) { // extends from root namespace
+                            $class->setParent($parent, $class->isInterface());
+                        } elseif(isset($aliases[$parent])) {
+                            $class->setParent($aliases[$parent], $class->isInterface());
+                        } else {
+                            $class->setParent($_ns.$parent, $class->isInterface());
+                        }
+                    } while($tokens->is(','));
                 }
                 if($tokens->is(T_IMPLEMENTS)) { // process 'implements' keyword
                     do {
@@ -114,9 +123,13 @@ class EntityFile {
                         case T_FUNCTION:
                             $method_name = $tokens->next()->get(T_STRING);
                             $method_line = $tokens->getLine();
-                            $method_body = $tokens->forwardTo('{')->getScope();
+                            $tokens->forwardTo(')')->next();
                             $method = $class->addMethod($method_name, [$this, $method_line]);
-                            $method->setBody($method_body)->scan();
+                            if($tokens->is('{')) {
+                                $method_body = $tokens->getScope();
+                                $method->setBody($method_body);
+                            }
+                            $method->scan();
                             $tokens->next();
                             break;
                         case '{':   // use traits scope
@@ -125,18 +138,22 @@ class EntityFile {
                         case '}':   // end of class
                             $tokens->next();
                             $this->classes[$class->name] = $class;
-                            break 3;
+                            break 2;
 
                     }
                 }
+            } elseif($tokens->is('}') && $ns_bracket) {
+                $tokens->next();
+                $ns_bracket = false;
             } else {
+                drop($tokens->curr);
+                if($tokens->valid()) {
+                    throw new UnexpectedTokenException($tokens);
+                }
                 break;
             }
         }
 
-        if($brackets) {
-            $tokens->need('}');
-        }
     }
 
     public function __toString() {

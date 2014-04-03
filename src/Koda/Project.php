@@ -154,6 +154,11 @@ class Project implements EntityInterface {
                     $interface = $this->_resolveDepend($interface);
                 }
             }
+            if($class->parents) {
+                foreach($class->parents as &$parent) {
+                    $parent = $this->_resolveDepend($parent);
+                }
+            }
         }
     }
 

@@ -57,6 +57,7 @@ class EntityMethod extends EntityFunction {
 
         if($func->isAbstract()) {
             $this->flags |= Flags::IS_ABSTRACT;
+            $this->class->flags |= Flags::IS_ABSTRACT_IMPLICIT;
         } elseif($func->isFinal()) {
             $this->flags |= Flags::IS_FINAL;
         }
@@ -68,5 +69,25 @@ class EntityMethod extends EntityFunction {
             $this->flags |= Flags::IS_DEPRECATED;
         }
         $this->_parseParams($func->getParameters(), $params);
+    }
+
+    public function isAbstract() {
+        return (bool)($this->flags & Flags::IS_ABSTRACT);
+    }
+
+    public function isFinal() {
+        return (bool)($this->flags & Flags::IS_FINAL);
+    }
+
+    public function isPublic() {
+        return (bool)($this->flags & Flags::IS_PUBLIC);
+    }
+
+    public function isPrivate() {
+        return (bool)($this->flags & Flags::IS_PRIVATE);
+    }
+
+    public function isProtected() {
+        return (bool)($this->flags & Flags::IS_PROTECTED);
     }
 }

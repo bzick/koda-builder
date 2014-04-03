@@ -11,7 +11,13 @@ class NamesTest extends TestCase {
     }
 
     public function testFunction() {
-        $this->assertTrue(function_exists('Koda\Sandbox\simple_function'));
-        $this->assertArguments('Koda\Sandbox\simple_function', ["x", "y"]);
+        $this->assertTrue(function_exists('Koda\Sandbox\simple_multi'));
+        $this->assertTrue(function_exists('KodaSandbox\simple_div'));
+    }
+
+    public function testClass() {
+        $this->assertTrue(class_exists('Koda\Sandbox\Names', false));
+        $this->assertTrue(class_exists('KodaSandbox\Names', false));
+        $this->assertTrue(method_exists('Koda\Sandbox\Names', 'publicMethod'));
     }
 } 

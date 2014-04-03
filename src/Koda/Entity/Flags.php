@@ -9,13 +9,24 @@ class Flags {
     const IS_INTERFACE = 0x2;
     const IS_TRAIT     = 0x4;
 
+    const CLASS_TYPES  = 0xF;
+
+    /**
+     * Flag denotes that class or method was explicitly defined as abstract by using the keyword.
+     */
     const IS_ABSTRACT = 0x10;
     const IS_FINAL    = 0x20;
+    /**
+     * Flag is used for abstract classes (since it is set by any abstract method even interfaces MAY have it set, too).
+     */
+    const IS_ABSTRACT_IMPLICIT = 0x40;
+    const MODIFIERS    = 0xF0;
 
     const IS_STATIC      = 0x100;
     const IS_PUBLIC      = 0x200;
     const IS_PRIVATE     = 0x400;
     const IS_PROTECTED   = 0x800;
+    const ACCESS_TYPE    = 0xF00;
 
     const IS_DEPRECATED  = 0x1000;
 

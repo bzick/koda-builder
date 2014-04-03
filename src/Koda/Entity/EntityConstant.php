@@ -30,7 +30,7 @@ class EntityConstant implements EntityInterface {
         if(!is_scalar($value)) {
             throw new \LogicException("Only scalar value allowed in constant");
         } else { // todo add resource handler
-            $this->type = Types::getType($value);
+            $this->type = Types::detectType($value);
         }
         $this->value = $value;
         $this->line = $line;
