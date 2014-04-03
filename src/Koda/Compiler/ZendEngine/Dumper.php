@@ -479,7 +479,8 @@ extern zend_class_entry *ce_{$name};
 {$methods}
 
 /* Init function */
-PHP_MINIT_FUNCTION({$name});
+PHP_MINIT_FUNCTION(init_{$name});
+PHP_MINIT_FUNCTION(load_{$name});
 
 END_EXTERN_C();
 
