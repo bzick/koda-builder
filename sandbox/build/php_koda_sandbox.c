@@ -23,8 +23,8 @@ PHP_FUNCTION(simple_multi) {
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_simple_multi, 0, 0,  1)
-    ZEND_ARG_INFO(0, x) // double $x
-    ZEND_ARG_INFO(0, y) // int $y = 5
+    ZEND_ARG_TYPE_INFO(0, x, IS_DOUBLE, 1) // double $x
+    ZEND_ARG_TYPE_INFO(0, y, IS_LONG, 1) // int $y = 5
 ZEND_END_ARG_INFO();
 
 /* proto function KodaSandbox\simple_div(double $x, int $y = 5, boolean $allow_zero = false):bool */
@@ -33,9 +33,9 @@ PHP_FUNCTION(simple_div) {
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_simple_div, 0, 0,  1)
-    ZEND_ARG_INFO(0, x) // double $x
-    ZEND_ARG_INFO(0, y) // int $y = 5
-    ZEND_ARG_INFO(0, allow_zero) // boolean $allow_zero = false
+    ZEND_ARG_TYPE_INFO(0, x, IS_DOUBLE, 1) // double $x
+    ZEND_ARG_TYPE_INFO(0, y, IS_LONG, 1) // int $y = 5
+    ZEND_ARG_TYPE_INFO(0, allow_zero, IS_BOOL, 1) // boolean $allow_zero = false
 ZEND_END_ARG_INFO();
 
 /* Register functions */
@@ -69,6 +69,7 @@ zend_module_entry koda_sandbox_module_entry = {
     "0.3",  // module version
     STANDARD_MODULE_PROPERTIES  // id, flags, ...
 };
+
 /* Init module */
 PHP_MINIT_FUNCTION(koda_sandbox) {
     /* Constants */
@@ -97,7 +98,11 @@ PHP_MINFO_FUNCTION(koda_sandbox) {
     php_info_print_table_header(2, "koda/sandbox support", "enabled");
     php_info_print_table_header(2, "koda/sandbox version", "0.3");
     php_info_print_table_header(2, "koda/sandbox with Koda", "0.1");
+#ifdef KODA_SANDBOX_DEBUG
     php_info_print_table_header(2, "koda/sandbox with debug", "yes");
+#else
+    php_info_print_table_header(2, "koda/sandbox with debug", "no");
+#endif
     php_info_print_table_header(2, "koda/sandbox optimization", "none");
     php_info_print_table_end();
 

@@ -6,50 +6,70 @@ use Koda\Entity\EntityClass;
 use Koda\Entity\EntityConstant;
 use Koda\Entity\EntityFile;
 use Koda\Entity\EntityFunction;
+use Koda\Entity\EntityGlobal;
 use Koda\Entity\EntityModule;
 use Symfony\Component\Finder\Finder;
 
+/**
+ * Project entity. Collection of all entities of the project.
+ * @package Koda
+ */
 class Project implements EntityInterface {
+    /**
+     * Project name
+     * @var string
+     */
     public $name;
+    /**
+     * Programming name
+     * @var string
+     */
     public $alias;
+    /**
+     * Internal programming name
+     * @var string
+     */
     public $code;
-
+    /**
+     * Project version
+     * Версия проекта
+     * @var string
+     */
     public $version = '0.0';
 
+    /**
+     * Project description
+     * @var string
+     */
     public $description;
 
     /**
+     * Project PHP files
      * @var EntityFile[]
      */
     public $files     = [];
 
     /**
-     * @var EntityFunction[]
-     */
-    public $functions = [];
-
-    /**
-     * @var EntityFunction[]
-     */
-    public $callable = [];
-
-    /**
-     * @var EntityClass[] (as ArrayObject)
+     * Class list (as ArrayObject)
+     * @var EntityClass[]
      */
     public $classes;
 
     /**
-     * @var EntityConstant[]
+     * Storage for global entities (e.g. functions and constants)
+     * @var EntityGlobal
      */
-    public $constants = [];
+    public $global;
 
     /**
+     * Dependence on extensions
      * @var EntityModule[]
      */
     public $depends = [];
 
     /**
-     * @param string $path
+     * Create project from Composer
+     * @param string $path path to project root
      * @return Project
      */
     public static function composer($path) {
@@ -101,8 +121,12 @@ class Project implements EntityInterface {
         return $project;
     }
 
+    /**
+     * @param string $name
+     */
     public function __construct($name) {
         $this->name = $name;
+        $this->global = new EntityGlobal($this);
         $this->classes = new \ArrayObject();
     }
 
@@ -119,6 +143,7 @@ class Project implements EntityInterface {
     }
 
     /**
+     * Set project name and description
      * @param string $name
      * @param string $descr
      * @return $this
@@ -129,6 +154,11 @@ class Project implements EntityInterface {
         return $this;
     }
 
+    /**
+     * Set project version
+     * @param $version
+     * @return $this
+     */
     public function setVersion($version) {
         $this->version = $version;
         return $this;
@@ -139,13 +169,11 @@ class Project implements EntityInterface {
      */
     public function scan() {
         foreach($this->files as $file) {
-            /* @var EntityFile $file */
             $file->scan();
             $this->_addEntities($file);
         }
 
         foreach($this->classes as $class) {
-            /* @var EntityClass $class */
             if($class->parent) {
                 $class->parent = $this->_resolveDepend($class->parent);
             }
@@ -163,40 +191,32 @@ class Project implements EntityInterface {
     }
 
     /**
-     * Add to project all entities form scanned file
+     * Resort entities found in the file
      * @param EntityFile $file
-     * @throws \LogicException
      */
     private function _addEntities(EntityFile $file) {
         foreach($file->classes as $class) {
-            /* @var EntityClass $class */
-            if(isset($this->classes[$class->name])) {
-                throw new \LogicException("Class {$class->name} already defined in ".$this->classes[$class->name]->line." (try to define in {$class->line})");
-            } else {
-                $this->classes[$class->name] = $class;
-                foreach($class->constants as $constant) {
-                    $this->constants[$constant->name] = $constant;
-                }
-                foreach($class->methods as $method) {
-                    $this->callable[$method->name] = $method;
-                }
-
-            }
+            $this->addClass($class);
         }
         foreach($file->constants as $constant) {
-            if(isset($this->constants[$constant->name])) {
-                throw new \LogicException("Constant {$constant->name} already defined in ".$this->constants[$constant->name]->line." (try to define in {$class->line})");
-            } else {
-                $this->constants[$constant->name] = $constant;
-            }
+            $this->global->addConstant($constant);
         }
         foreach($file->functions as $function) {
-            if(isset($this->functions[$function->name])) {
-                throw new \LogicException("Function {$function->name} already defined in ".$this->functions[$function->name]->line." (try to define in {$function->line})");
-            } else {
-                $this->functions[$function->name] = $function;
-                $this->callable[$function->name] = $function;
-            }
+            $this->global->addFunction($function);
+
+        }
+    }
+
+    /**
+     * Add class
+     * @param Entity\EntityClass $class
+     * @throws \LogicException
+     */
+    public function addClass(EntityClass $class) {
+        if(isset($this->classes[$class->name])) {
+            throw new \LogicException("{$class} already defined in ".$this->classes[$class->name]->line." (try to define in {$class->line})");
+        } else {
+            $this->classes[$class->name] = $class;
         }
     }
 
@@ -220,16 +240,6 @@ class Project implements EntityInterface {
     }
 
     public function dump($tab = "") {
-        $constants = [];
-        foreach($this->constants as $const) {
-            if(!$const->class) {
-                $constants[] = $const->dump($tab.'    ');
-            }
-        }
-        $functions = [];
-        foreach($this->functions as $function) {
-            $functions[] = $function->dump($tab.'    ');
-        }
         $classes = [];
         foreach($this->classes as $class) {
             $classes[] = $class->dump($tab.'    ');
@@ -237,8 +247,7 @@ class Project implements EntityInterface {
         return "Project {$this->name} {".
             "\n$tab    version {$this->version}".
             "\n$tab    alias {$this->alias} [internal {$this->code}]\n".
-            "\n$tab    ".implode("\n$tab    ", $constants)."\n".
-            "\n$tab    ".implode("\n$tab    ", $functions)."\n".
+            "\n$tab    {$this->global->dump('    ')}\n".
             "\n$tab    ".implode("\n$tab    ", $classes)."\n".
         "\n{$tab}}";
     }

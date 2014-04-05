@@ -10,6 +10,11 @@ class ToolKit {
 
     public static $tab = "    ";
 
+    /**
+     * @param $item
+     * @param string $tab
+     * @return mixed|string
+     */
     public static function dump($item, $tab = "") {
         switch(gettype($item)) {
             case "integer":
@@ -43,6 +48,11 @@ class ToolKit {
         }
     }
 
+    /**
+     * Split entity name
+     * @param string $name
+     * @return array [0 => namespace, 1 => short name, 2 => name after '::']: Some\NS\myClass::isMethod => [Some\NS, myClass, isMethod]
+     */
     public static function splitNames($name) {
         $ns = $basename = $item = null;
         if(strpos($name, '::')) {

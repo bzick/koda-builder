@@ -89,7 +89,7 @@ class Dumper {
 
 
     /**
-     * m4 config for unix `configure`
+     * m4 config for unix `configure` program: config.m4
      * @see http://docs.php.net/manual/en/internals2.buildsys.configunix.php
      * @return string
      */
@@ -126,6 +126,7 @@ M4;
     }
 
     /**
+     * Windows config: config.w32
      * @see http://www.php.net/manual/en/internals2.buildsys.configwin.php
      * @return string
      */
@@ -135,7 +136,7 @@ M4;
     }
 
     /**
-     * Generate module main H file
+     * Generate module main H file: php_{$project->code}.h
      * @return string
      */
     public function extH() {
@@ -150,9 +151,9 @@ M4;
         } else {
             $init_classes = "";
         }
-        if($this->project->functions) {
+        if($this->project->global->functions) {
             $functions = ["/* Global functions */"];
-            foreach($this->project->functions as $function) {
+            foreach($this->project->global->functions as $function) {
                 $functions[] = "PHP_FUNCTION(php_{$function->short});\n";
             }
             $functions = implode("\n", $functions)."\n";
@@ -181,7 +182,7 @@ CONTENT;
 
 
     /**
-     * Generate module main C file
+     * Generate module main C file: php_{$project->code}.c
      * @return string
      */
     public function extC() {
@@ -210,13 +211,10 @@ BEGIN_EXTERN_C();
 
 HEADER;
         /* Functions */
-        if($this->project->functions) {
+        if($this->project->global->functions) {
             echo "/* Global functions */\n";
             $entry_table = [];
-            foreach($this->project->functions as $function) {
-                if($function->class) {
-                    continue;
-                }
+            foreach($this->project->global->functions as $function) {
                 if($function->arguments) {
                     $arginfo     = [];
                     foreach($function->arguments as $argument) {
@@ -295,12 +293,9 @@ zend_module_entry {$this->code}_module_entry = {
 };
 
 REGISTER_MODULE;
-        if($this->project->constants) {
+        if($this->project->global->constants) {
             $constants = ['/* Constants */'];
-            foreach($this->project->constants as $constant) {
-                if($constant->class) {
-                    continue;
-                }
+            foreach($this->project->global->constants as $constant) {
                 $constants[] = "/* {$constant->dump()} */";
                 $constants[] = $this->_constant($constant);
             }
@@ -321,6 +316,7 @@ REGISTER_MODULE;
             $inits = $loads = "";
         }
         echo <<<INIT_MODULE
+
 /* Init module */
 PHP_MINIT_FUNCTION({$this->code}) {
     {$constants}
@@ -341,7 +337,11 @@ PHP_MINFO_FUNCTION({$this->code}) {
     php_info_print_table_header(2, "{$this->project->name} support", "enabled");
     php_info_print_table_header(2, "{$this->project->name} version", "{$this->project->version}");
     php_info_print_table_header(2, "{$this->project->name} with Koda", "{$koda_version}");
+#ifdef {$this->CODE}_DEBUG
     php_info_print_table_header(2, "{$this->project->name} with debug", "yes");
+#else
+    php_info_print_table_header(2, "{$this->project->name} with debug", "no");
+#endif
     php_info_print_table_header(2, "{$this->project->name} optimization", "none");
     php_info_print_table_end();
 
@@ -353,15 +353,29 @@ FOOTER;
     }
 
     /**
+     * Generate argument info for method or function
      * @param EntityArgument $argument
      * @return string
      */
     private function _arginfo(EntityArgument $argument) {
+        static $types = [
+            Types::BOOLEAN => 'IS_BOOL',
+            Types::STRING => 'IS_STRING',
+            Types::INT => 'IS_LONG',
+            Types::DOUBLE => 'IS_DOUBLE',
+            Types::RESOURCE => 'IS_RESOURCE'
+        ];
         switch($argument->type) {
+            case Types::BOOLEAN:
+            case Types::STRING:
+            case Types::INT:
+            case Types::DOUBLE:
+            case Types::RESOURCE:
+                return "ZEND_ARG_TYPE_INFO({$argument->isRef()}, {$argument->name}, {$types[$argument->type]}, {$argument->allowsNull()})";
             case Types::OBJECT:
-                return "ZEND_ARG_OBJ_INFO({$argument->isRef()}, {$argument->name}, \"".addslashes($argument->instance_of)."\", ".intval($argument->is_optional).")";
+                return "ZEND_ARG_OBJ_INFO({$argument->isRef()}, {$argument->name}, \"".addslashes($argument->instance_of)."\", {$argument->allowsNull()})";
             case Types::ARR:
-                return "ZEND_ARG_ARRAY_INFO({$argument->isRef()}, {$argument->name}, 1)";
+                return "ZEND_ARG_ARRAY_INFO({$argument->isRef()}, {$argument->name}, {$argument->allowsNull()})";
             default:
                 return "ZEND_ARG_INFO({$argument->isRef()}, {$argument->name})";
         }
@@ -565,7 +579,7 @@ REGISTER_METHODS;
                 $constants[] = "/* {$constant->dump()} */";
                 $constants[] = $this->_constant($constant);
             }
-            $constants = "\n".implode("\n    ", $constants)."\n";
+            $constants = "\n     ".implode("\n    ", $constants)."\n";
         } else {
             $constants = "";
         }
@@ -575,7 +589,7 @@ REGISTER_METHODS;
                 $properties[] = "/* {$prop->dump()} */";
                 $properties[] = $this->_property($prop);
             }
-            $properties = "\n".implode("\n    ", $properties)."\n";
+            $properties = "\n     ".implode("\n    ", $properties)."\n";
         } else {
             $properties = "";
         }

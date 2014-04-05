@@ -10,7 +10,8 @@ extern zend_class_entry *ce_KodaSandbox_Names;
 PHP_METHOD(KodaSandbox_Names, abstractMethod);
 
 /* Init function */
-PHP_MINIT_FUNCTION(KodaSandbox_Names);
+PHP_MINIT_FUNCTION(init_KodaSandbox_Names);
+PHP_MINIT_FUNCTION(load_KodaSandbox_Names);
 
 END_EXTERN_C();
 

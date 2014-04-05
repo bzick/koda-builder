@@ -19,7 +19,8 @@ PHP_METHOD(Koda_Sandbox_Names, __destruct);
 PHP_METHOD(Koda_Sandbox_Names, jsonSerialize);
 
 /* Init function */
-PHP_MINIT_FUNCTION(Koda_Sandbox_Names);
+PHP_MINIT_FUNCTION(init_Koda_Sandbox_Names);
+PHP_MINIT_FUNCTION(load_Koda_Sandbox_Names);
 
 END_EXTERN_C();
 

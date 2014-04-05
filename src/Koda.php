@@ -1,10 +1,25 @@
 <?php
 use Koda\ToolKit;
 
+/**
+ * Class Koda
+ */
 class Koda {
     const VERSION_STRING = "0.1";
+    /**
+     * Some configuration. unstructured yet
+     * @var array
+     */
     public $config = [];
+    /**
+     * Project root path
+     * @var string
+     */
     public $root;
+    /**
+     * Path to resources of Koda
+     * @var string
+     */
     public $resources_dir;
 
     /**
@@ -13,12 +28,12 @@ class Koda {
      * @internal param string $config_path
      */
     public function __construct($root = null) {
-        $this->root = $root;
+        $this->root = $root?:getcwd();
         $this->resources_dir = __DIR__.'/../resources';
     }
 
     /**
-     *
+     * Dispatch CLI request
      */
     public function dispatch() {
         $options = getopt('h', array(
@@ -46,11 +61,19 @@ Help:  $file -h|--help\n";
 
 }
 
+/**
+ * Helper, var_dump()
+ * @param mixed $item
+ */
 function dump($item) {
     echo ToolKit::dump($item)."\n";
     echo (new Exception())->getTraceAsString()."\n";
 }
 
+/**
+ * Helper, var_dump(); exit;
+ * @param mixed $item
+ */
 function drop($item) {
     echo ToolKit::dump($item)."\n";
     echo (new Exception())->getTraceAsString()."\n";

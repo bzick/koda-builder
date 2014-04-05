@@ -10,7 +10,8 @@ extern zend_class_entry *ce_Koda_Sandbox_NamesInterface;
 PHP_METHOD(Koda_Sandbox_NamesInterface, gonnaDo);
 
 /* Init function */
-PHP_MINIT_FUNCTION(Koda_Sandbox_NamesInterface);
+PHP_MINIT_FUNCTION(init_Koda_Sandbox_NamesInterface);
+PHP_MINIT_FUNCTION(load_Koda_Sandbox_NamesInterface);
 
 END_EXTERN_C();
 

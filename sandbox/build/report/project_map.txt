@@ -5,7 +5,7 @@ Project koda/sandbox {
     const Koda\Sandbox\FIVE = 5
     const Koda\Sandbox\FLOAT_FIVE = 5.5
     const Koda\Sandbox\STRING_FIVE = 'five'
-
+    
     function Koda\Sandbox\simple_multi(double $x, int $y = 5):bool
     function KodaSandbox\simple_div(double $x, int $y = 5, boolean $allow_zero = false):bool
 
@@ -36,7 +36,7 @@ Project koda/sandbox {
 
     interface Koda\Sandbox\NamesInterface [abstract] {
         line: /Volumes/Data/Dev/koda/sandbox/src/Names.php:74
-        parents: 0, 1
+        parents: Traversable, Iterator
         
         method Koda\Sandbox\NamesInterface::gonnaDo():void  [abstract public]
     }

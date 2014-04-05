@@ -23,6 +23,7 @@ class EntityArgument implements EntityInterface {
     public $position;
     public $type;
     public $instance_of;
+    public $allows_null;
     public $hint;
 
     public function __construct(EntityFunction $function, $name) {
@@ -41,6 +42,10 @@ class EntityArgument implements EntityInterface {
             $type = Types::getTypeCode($this->type);
         }
         return $type.' $'.$this->name.($this->is_optional ? ' = '.var_export($this->default_value, true) : '');
+    }
+
+    public function allowsNull() {
+        return intval($this->allows_null);
     }
 
     public function __toString() {

@@ -157,6 +157,7 @@ class EntityFunction implements EntityInterface {
                 $argument->description = $doc_params[ $param->name ];
             }
             $argument->is_optional = $param->isOptional();
+            $argument->allows_null = $param->allowsNull();
             if(!$argument->is_optional) {
                 $this->required++;
             }

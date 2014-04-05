@@ -5,16 +5,49 @@ namespace Koda\Entity;
 use Koda\EntityInterface;
 use Koda\ToolKit;
 
+/**
+ * Entity of the constant
+ * @package Koda\Entity
+ */
 class EntityConstant implements EntityInterface {
 
+    /**
+     * Value type
+     * @see Koda\Entity\Types
+     * @var int
+     */
     public $type = 0;
+    /**
+     * Value
+     * @var bool|float|int|string
+     */
     public $value;
+    /**
+     * Name with namespace
+     * @var string
+     */
     public $name;
+    /**
+     * Short name (without namespace)
+     * @var
+     */
+    public $short;
+    /**
+     * Namespace name
+     * @var string
+     */
     public $ns;
 
+    /**
+     * Line position
+     * @var array
+     */
     public $line;
+    /**
+     * Class-owner of the constant. If null constant is global
+     * @var EntityClass|null
+     */
     public $class;
-    public $short;
 
     /**
      * @param string $name
@@ -37,10 +70,16 @@ class EntityConstant implements EntityInterface {
         $this->class = $class;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function dump($tab = "") {
         return "const {$this->name} = ".var_export($this->value, true);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function __toString() {
         return "const {$this->name}";
     }

@@ -122,7 +122,7 @@ PHP_MINIT_FUNCTION(init_Koda_Sandbox_Names) {
     INIT_CLASS_ENTRY(ce, "Koda\\Sandbox\\Names", Koda_Sandbox_Names_methods);
     ce_Koda_Sandbox_Names = zend_register_internal_class(&ce TSRMLS_CC);
     
-/* Class constants */
+     /* Class constants */
     /* const Koda\Sandbox\Names::FIVE = 5 */
     REGISTER_CLASS_LONG_CONSTANT(ce_Koda_Sandbox_Names, "FIVE", 5);
     /* const Koda\Sandbox\Names::FLOAT_FIVE = 5.5 */
@@ -131,7 +131,7 @@ PHP_MINIT_FUNCTION(init_Koda_Sandbox_Names) {
     REGISTER_CLASS_STRING_CONSTANT(ce_Koda_Sandbox_Names, "STRING_FIVE", "five");
 
     
-/* Class properties */
+     /* Class properties */
     /* prop Koda\Sandbox\Names::$five = 5 [public] */
     REGISTER_CLASS_LONG_PROPERTY(ce_Koda_Sandbox_Names, "five", 5, ZEND_ACC_PUBLIC);
     /* prop Koda\Sandbox\Names::$float_five = 5.5 [protected] */
