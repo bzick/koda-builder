@@ -224,11 +224,13 @@ HEADER;
                 } else {
                     $arginfo = "";
                 }
+                $scope = new Scope($function);
+                $body = $scope->convert();
                 echo <<<DEFINE_FUNTION
 
 /* proto {$function->dump()} */
 PHP_FUNCTION({$function->short}) {
-    // coming soon ...
+    {$body}
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_{$function->short}, 0, {$function->isReturnRef()},  {$function->required}){$arginfo}

@@ -3,6 +3,7 @@
 namespace Koda;
 
 use Koda\Entity\EntityFunction;
+use Koda\Entity\Types;
 use PhpParser\Node;
 use PhpParser\NodeDumper;
 
@@ -72,5 +73,71 @@ class ToolKit {
 
         return [$ns, $basename, $item];
     }
+
+	/**
+	 * @param string $doc
+	 * @return array
+	 */
+	public static function parseDoc($doc) {
+		$doc = preg_replace('/^\s*(\*\s*)+/mS', '', trim($doc, "*/ \t\n\r"));
+		$info = [
+			"desc" => "",
+			"return" => [
+				'type' => -1,
+				'desc' => ''
+			],
+			"options" => [],
+		];
+		$params = [];
+		if(strpos($doc, "@") !== false) {
+			$doc = explode("@", $doc, 2);
+			if($doc[0] = trim($doc[0])) {
+				$info["desc"] = $doc[0];
+			}
+			if($doc[1]) {
+				foreach(preg_split('/\r?\n@/Sm', $doc[1]) as $param) {
+					$param = preg_split('/\s+/', $param, 2);
+					if(!isset($param[1])) {
+						$param[1] = "";
+					}
+					switch(strtolower($param[0])) {
+						case 'desc':
+						case 'description':
+							if(empty($info["desc"])) {
+								$info["desc"] = $param[1];
+							}
+							break;
+						case 'param':
+							if(preg_match('/^(.*?)\s*\$(\w+)\s*?/Sm', $param[1], $matches)) {
+								$params[ $matches[2] ] = array(
+									"type" => $matches[1],
+									"desc" => trim(substr($param[1], strlen($matches[0])))
+								);
+							}
+							break;
+						case 'return':
+							if(preg_match('/^(.*?)\s*$/Sm', $param[1], $matches)) {
+								$info["return"]["type"] = Types::getType($matches[1]);
+								$info["return"]["desc"] = isset($matches[2]) ? $matches[2] : '';
+							}
+							break;
+						default:
+							if(isset($info["options"][ $param[0] ])) {
+								if(!is_array($params["options"][ $param[0] ])) {
+									$info["options"][ $param[0] ] = array($info["options"][ $param[0] ]);
+								}
+								$info["options"][ $param[0] ][] = $param[1];
+							} else {
+								$info["options"][ $param[0] ] = $param[1];
+							}
+					}
+				}
+			}
+		} else {
+			$info["desc"] = $doc;
+		}
+		$info['params'] = $params;
+		return $info;
+	}
 }
 

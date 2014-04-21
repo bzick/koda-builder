@@ -4,6 +4,7 @@ namespace Koda\Entity;
 
 
 use Koda\EntityInterface;
+use Koda\ToolKit;
 use PhpParser\Lexer;
 use PhpParser\Parser;
 
@@ -27,8 +28,10 @@ class EntityFunction implements EntityInterface {
 
     public $strict = true;
     public $name;
-    public $description;
-    public $return;
+    public $description = "";
+    public $return_type = -1;
+    public $return_desc = "";
+    public $return_ref = 0;
     public $options;
     public $is_ref    = false;
     public $generator = false;
@@ -50,106 +53,93 @@ class EntityFunction implements EntityInterface {
     public $stmts;
 
     /**
-     * @param $name
-     * @param $aliases
-     * @param $line
-     * @param EntityClass $class
+     * @param string $name
      */
-    public function __construct($name, $aliases, $line, $class = null) {
-        $this->aliases = $aliases;
+    public function __construct($name) {
         $this->name = $name;
-        $this->short = $name;
-        $this->line = $line;
-        $this->class = $class;
+	    list($this->ns, $this->short) = ToolKit::splitNames($name);
     }
+
+	public function setAliases($aliases) {
+		$this->aliases = $aliases;
+	}
+
+	public function setLine($line) {
+		$this->line = $line;
+	}
+
+	public function setDescription($desc) {
+		$this->description = $desc;
+		return $this;
+	}
+
+	/**
+	 * Set information about return value
+	 * @param int $type one of Type::* constant
+	 * @param int $is_ref
+	 * @param string $desc
+	 * @return $this
+	 */
+	public function setReturnInfo($type, $is_ref = 0, $desc = "") {
+		$this->return_type = $type;
+		$this->return_desc = $desc;
+		$this->return_ref  = intval($is_ref);
+		return $this;
+	}
+
+	public function setOptions($options) {
+		$this->options = $options;
+		return $this;
+	}
 
     /**
      * @param string $body
      * @return $this
      */
     public function setBody($body) {
-        $this->body = $body;
-        $parser = new Parser(new Lexer);
-        $this->stmts = $parser->parse('<?php'.$this->body);
+        $body = trim($body);
+        if($body) {
+            $this->body = $body;
+            $parser = new Parser(new Lexer);
+            $this->stmts = $parser->parse('<?php '.$this->body);
+        }
         return $this;
     }
 
-    public function isReturnRef() {
-        return intval($this->is_ref);
+	/**
+	 * @return int
+	 */
+	public function isReturnRef() {
+        return $this->return_ref;
     }
 
-    /**
-     *
-     * @throws \LogicException
-     * @return \ReflectionFunctionAbstract
-     */
-    public function scan() {
-        $func        = new \ReflectionFunction($this->name);
-        $this->short = $func->getShortName();
-        $this->ns    = $func->getNamespaceName();
+	/**
+	 *
+	 * @param \ReflectionFunctionAbstract $reflection
+	 * @return $this
+	 */
+    public function scan(\ReflectionFunctionAbstract $reflection = null) {
+        $func        = $reflection ?: new \ReflectionFunction($this->name);
         $doc         = $func->getDocComment();
         $params      = [];
 
         if($doc) {
-            $params = $this->_parseDocBlock($doc);
+	        $info = ToolKit::parseDoc($doc);
+	        $this->setDescription($info['desc']);
+	        $this->setReturnInfo($info['return']['type'], $func->returnsReference(), $info['return']['desc']);
+	        $this->setOptions($info['options']);
+	        $params = $info["params"];
         }
         $this->_parseParams($func->getParameters(), $params);
+	    return $this;
     }
 
-    protected function _parseDocBlock($doc) {
-        $doc = preg_replace('/^\s*(\*\s*)+/mS', '', trim($doc, "*/ \t\n\r"));
-        $params = [];
-        if(strpos($doc, "@") !== false) {
-            $doc = explode("@", $doc, 2);
-            if($doc[0] = trim($doc[0])) {
-                $this->description = $doc[0];
-            }
-            if($doc[1]) {
-                foreach(preg_split('/\r?\n@/Sm', $doc[1]) as $param) {
-                    $param = preg_split('/\s+/', $param, 2);
-                    if(!isset($param[1])) {
-                        $param[1] = "";
-                    }
-                    switch(strtolower($param[0])) {
-                        case 'description':
-                            if(empty($info["desc"])) {
-                                $this->description = $param[1];
-                            }
-                            break;
-                        case 'param':
-                            if(preg_match('/^(.*?)\s*\$(\w+)\s*?/Sm', $param[1], $matches)) {
-                                $params[ $matches[2] ] = array(
-                                    "type" => $matches[1],
-                                    "desc" => trim(substr($param[1], strlen($matches[0])))
-                                );
-                            }
-                            break;
-                        case 'return':
-                            if(preg_match('/^(.*?)\s*$/Sm', $param[1], $matches)) {
-                                $this->return["type"] = $matches[1];
-                                $this->return["desc"] = isset($matches[2]) ? $matches[2] : '';
-                            }
-                            break;
-                        default:
-                            if(isset($this->options[ $param[0] ])) {
-                                if(!is_array($this->options[ $param[0] ])) {
-                                    $this->options[ $param[0] ] = array($this->options[ $param[0] ]);
-                                }
-                                $this->options[ $param[0] ][] = $param[1];
-                            } else {
-                                $this->options[ $param[0] ] = $param[1];
-                            }
-                    }
-                }
-            }
-        } else {
-            $info["desc"] = $doc;
-        }
-
-        return $params;
-    }
-
-    public function _parseParams($params, $doc_params) {
+	/**
+	 * Parse parameters
+	 * @param \ReflectionParameter[] $params
+	 * @param array $doc_params
+	 */
+	private function _parseParams($params, $doc_params) {
         /* @var \ReflectionParameter[] $params */
         foreach($params as $param) {
             $argument = new EntityArgument($this, $param->name);
@@ -208,7 +198,7 @@ class EntityFunction implements EntityInterface {
         foreach($this->arguments as $arg) {
             $args[] = $arg->dump();
         }
-        return static::$entity_type." {$this->name}(".($args ? implode(', ', $args) : '').'):'.($this->return ? $this->return['type'] : 'void');
+        return static::$entity_type." {$this->name}(".($args ? implode(', ', $args) : '').'):'.($this->return_type == -1 ? 'void' : Types::getTypeCode($this->return_type));
     }
 
     public function __toString() {

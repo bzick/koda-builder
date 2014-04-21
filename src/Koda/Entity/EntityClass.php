@@ -88,18 +88,15 @@ class EntityClass implements EntityInterface {
 
     /**
      * @param string $class
-     * @param string[] $aliases
-     * @param array $line
      */
-    public function __construct($class, $aliases, array $line) {
+    public function __construct($class) {
         $ref           = new \ReflectionClass($class);
         $this->short   = $ref->getShortName();
         $this->ns      = $ref->getNamespaceName();
-        $this->aliases = $aliases;
+
         $this->name    = $class;
         $this->cname   = str_replace('\\', '_', $class);
         $this->escaped = addslashes($class);
-        $this->line    = $line;
         $this->extension  = $ref->getExtension();
         if($ref->isInterface()) {
             $this->flags = Flags::IS_INTERFACE;
@@ -114,6 +111,13 @@ class EntityClass implements EntityInterface {
             $this->flags |= Flags::IS_FINAL;
         }
     }
+
+	/**
+	 * @param $line
+	 */
+	public function setLine($line) {
+		$this->line = $line;
+	}
 
     /**
      * Checks if the class is an interface
@@ -155,12 +159,13 @@ class EntityClass implements EntityInterface {
         return $this->flags & Flags::IS_ABSTRACT;
     }
 
-    /**
-     * Set class parent
-     * @param string $parent class name
-     * @param bool $multiple multiple parents enable
-     * @throws \LogicException
-     */
+	/**
+	 * Set class parent
+	 * @param string $parent class name
+	 * @param bool $multiple multiple parents enable
+	 * @return $this
+	 * @throws \LogicException
+	 */
     public function setParent($parent, $multiple = false) {
         if($multiple) {
             $this->parents[$parent] = new \ReflectionClass($parent);
@@ -169,22 +174,27 @@ class EntityClass implements EntityInterface {
         } else {
             $this->parent = new \ReflectionClass($parent);
         }
+	    return $this;
     }
 
-    /**
-     * Add interface
-     * @param string $interface interface name
-     */
+	/**
+	 * Add interface
+	 * @param string $interface interface name
+	 * @return $this
+	 */
     public function addInterface($interface) {
         $this->interfaces[$interface] = new \ReflectionClass($interface);
+	    return $this;
     }
 
-    /**
-     * Set aliases used in namespace
-     * @param $aliases
-     */
+	/**
+	 * Set aliases used in namespace
+	 * @param string[] $aliases
+	 * @return $this
+	 */
     public function setAliases($aliases) {
         $this->aliases = $aliases;
+	    return $this;
     }
 
     /**

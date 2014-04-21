@@ -1,13 +1,13 @@
 Project koda/sandbox {
-    version 0.3
+    version 0.2-0-gf1847a6
     alias KodaSandbox [internal koda_sandbox]
 
     const Koda\Sandbox\FIVE = 5
     const Koda\Sandbox\FLOAT_FIVE = 5.5
     const Koda\Sandbox\STRING_FIVE = 'five'
     
-    function Koda\Sandbox\simple_multi(double $x, int $y = 5):bool
-    function KodaSandbox\simple_div(double $x, int $y = 5, boolean $allow_zero = false):bool
+    function Koda\Sandbox\simple_multi(double $x, int $y = 5):boolean
+    function KodaSandbox\simple_div(double $x, int $y = 5, boolean $allow_zero = false):boolean
 
     class Koda\Sandbox\Names {
         line: /Volumes/Data/Dev/koda/sandbox/src/Names.php:22
@@ -22,29 +22,41 @@ Project koda/sandbox {
         prop Koda\Sandbox\Names::$float_five = 5.5 [protected]
         prop Koda\Sandbox\Names::$string_five = 'five' [static private]
         
-        method Koda\Sandbox\Names::__construct(Koda\Sandbox\Names $self, array $list = NULL):void  [public]
-        method Koda\Sandbox\Names::publicStatic():void  [final static public]
-        method Koda\Sandbox\Names::privateStatic():void  [static private]
-        method Koda\Sandbox\Names::protectedStatic():void  [static protected]
-        method Koda\Sandbox\Names::publicMethod():void  [public]
-        method Koda\Sandbox\Names::privateMethod():void  [private]
-        method Koda\Sandbox\Names::protectedMethod():void  [protected]
-        method Koda\Sandbox\Names::__clone():void  [public]
-        method Koda\Sandbox\Names::__destruct():void  [public]
-        method Koda\Sandbox\Names::jsonSerialize():void  [public]
+        function Koda\Sandbox\Names::__construct(Koda\Sandbox\Names $self, array $list = NULL):void  [public]
+        function Koda\Sandbox\Names::publicStatic():void  [final static public]
+        function Koda\Sandbox\Names::privateStatic():void  [static private]
+        function Koda\Sandbox\Names::protectedStatic():void  [static protected]
+        function Koda\Sandbox\Names::publicMethod():void  [public]
+        function Koda\Sandbox\Names::privateMethod():void  [private]
+        function Koda\Sandbox\Names::protectedMethod():void  [protected]
+        function Koda\Sandbox\Names::__clone():void  [public]
+        function Koda\Sandbox\Names::__destruct():void  [public]
+        function Koda\Sandbox\Names::jsonSerialize():void  [public]
     }
 
     interface Koda\Sandbox\NamesInterface [abstract] {
         line: /Volumes/Data/Dev/koda/sandbox/src/Names.php:74
         parents: Traversable, Iterator
         
-        method Koda\Sandbox\NamesInterface::gonnaDo():void  [abstract public]
+        function Koda\Sandbox\NamesInterface::gonnaDo():void  [abstract public]
     }
 
     class KodaSandbox\Names [abstract] {
         line: /Volumes/Data/Dev/koda/sandbox/src/Names.php:93
         
-        method KodaSandbox\Names::abstractMethod():void  [abstract public]
+        function KodaSandbox\Names::abstractMethod():void  [abstract public]
+    }
+
+    class Koda\Sandbox\Returns {
+        line: /Volumes/Data/Dev/koda/sandbox/src/Primitive.php:6
+        
+        function Koda\Sandbox\Returns::returnInt():void  [public]
+        function Koda\Sandbox\Returns::returnDouble():void  [public]
+        function Koda\Sandbox\Returns::returnNegative():void  [public]
+        function Koda\Sandbox\Returns::returnString():void  [public]
+        function Koda\Sandbox\Returns::returnTrue():void  [public]
+        function Koda\Sandbox\Returns::returnFalse():void  [public]
+        function Koda\Sandbox\Returns::returnNULL():void  [public]
     }
 
 

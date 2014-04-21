@@ -41,12 +41,16 @@ class EntityArgument implements EntityInterface {
         } else {
             $type = Types::getTypeCode($this->type);
         }
-        return $type.' $'.$this->name.($this->is_optional ? ' = '.var_export($this->default_value, true) : '');
+        return $type.' '.($this->is_ref ? '&' : '').'$'.$this->name.($this->is_optional ? ' = '.var_export($this->default_value, true) : '');
     }
 
     public function allowsNull() {
         return intval($this->allows_null);
     }
+
+	public function isOptional() {
+		return intval($this->is_optional);
+	}
 
     public function __toString() {
         return '$'.$this->name;

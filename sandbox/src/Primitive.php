@@ -3,38 +3,32 @@
 namespace Koda\Sandbox;
 
 
-class Primitive {
-
-    const FIVE = 5;
-    const FLOAT_FIVE = 5.5;
-    const STRING_ZERO = 'five';
-
-    public function getInt() {
+class Returns {
+    public function returnInt() {
         return 2;
     }
 
-    public function getNegative() {
+    public function returnDouble() {
+        return 2.5;
+    }
+
+    public function returnNegative() {
         return -5;
     }
 
-    public function getString() {
+    public function returnString() {
         return "some string";
     }
 
-    public function getTrue() {
+    public function returnTrue() {
         return true;
     }
 
-    public function getFalse() {
+    public function returnFalse() {
         return false;
     }
 
-    public function getNULL() {
+    public function returnNULL() {
         return null;
     }
-}
-
-
-function primitive_function() {
-    return "primitive";
 }

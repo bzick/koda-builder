@@ -26,7 +26,6 @@ PHP_MINIT_FUNCTION(init_KodaSandbox_Names) {
     ce_KodaSandbox_Names = zend_register_internal_class(&ce TSRMLS_CC);
     memcpy(&handlers_KodaSandbox_Names, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
     ce_KodaSandbox_Names->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
-    ce_KodaSandbox_Names->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
     
     
     return SUCCESS;

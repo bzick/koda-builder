@@ -1,7 +1,8 @@
 #!/usr/bin/env php
 <?php
 
-foreach(['../vendor/autolad.php', '../../../../autoload.php'] as $loader) {
+foreach(['../vendor/autoload.php', '../../../../autoload.php'] as $loader) {
+	$loader = realpath(__DIR__.'/'.$loader);
     if(file_exists($loader)) {
         require_once $loader;
         define('KODA_COMPOSER_LOADER', $loader);
@@ -14,4 +15,5 @@ if(!defined('KODA_COMPOSER_LOADER')) {
 }
 
 $koda = new Koda(getcwd());
+Koda\CLI::configure($koda);
 $koda->dispatch();

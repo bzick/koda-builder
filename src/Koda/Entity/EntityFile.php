@@ -81,7 +81,8 @@ class EntityFile {
             } elseif($tokens->is(T_FINAL, T_ABSTRACT, T_INTERFACE, T_TRAIT, T_CLASS)) {
                 $tokens->forwardTo(T_STRING);
                 $name = $tokens->current();
-                $class = new EntityClass($_ns.$name, $aliases, [$this, $tokens->getLine()]);
+                $class = new EntityClass($_ns.$name);
+	            $class->setAliases($aliases)->setLine([$this, $tokens->getLine()]);
                 $tokens->next();
                 if($tokens->is(T_EXTENDS)) { // process 'extends' keyword
                     do {

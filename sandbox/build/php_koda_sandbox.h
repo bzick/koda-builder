@@ -4,7 +4,7 @@
 extern zend_module_entry koda_sandbox_module_entry;
 #define phpext_koda_sandbox_ptr &koda_sandbox_module_entry
 
-#define PHP_KODA_SANDBOX_VERSION "0.3"
+#define PHP_KODA_SANDBOX_VERSION "0.2-0-gf1847a6"
 
 /* Global functions */
 PHP_FUNCTION(php_simple_multi);
@@ -20,6 +20,8 @@ PHP_MINIT_FUNCTION(init_Koda_Sandbox_NamesInterface); // init class Koda\Sandbox
 PHP_MINIT_FUNCTION(load_Koda_Sandbox_NamesInterface); // load class Koda\Sandbox\NamesInterface
 PHP_MINIT_FUNCTION(init_KodaSandbox_Names); // init class KodaSandbox\Names
 PHP_MINIT_FUNCTION(load_KodaSandbox_Names); // load class KodaSandbox\Names
+PHP_MINIT_FUNCTION(init_Koda_Sandbox_Returns); // init class Koda\Sandbox\Returns
+PHP_MINIT_FUNCTION(load_Koda_Sandbox_Returns); // load class Koda\Sandbox\Returns
 
 PHP_MINFO_FUNCTION(koda_sandbox);
 #endif	/* PHP_KODA_SANDBOX_H */

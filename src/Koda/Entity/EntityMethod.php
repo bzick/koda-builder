@@ -3,30 +3,32 @@
 namespace Koda\Entity;
 
 
+use Koda\ToolKit;
+
 class EntityMethod extends EntityFunction {
-
-    protected static $entity_type = "method";
-
-    public $flags = 0;
+	/**
+	 * Method flags, see Koda\Entity\Flags
+	 * @var int
+	 */
+	public $flags = 0;
     /**
      * @var EntityClass alias of $scope property
      */
     public $class;
 
     /**
-     * @param $name
-     * @param $aliases
-     * @param $line
-     * @param EntityClass $class
+     * @param string $name
      */
-    public function __construct($name, $aliases, $line, $class = null) {
-        list($class_name, $short) = explode("::", $name, 2);
-        $this->aliases = $aliases;
-        $this->name = $name;
-        $this->short = $short;
-        $this->line = $line;
-        $this->class = $class;
+    public function __construct($name) {
+	    $this->name = $name;
+	    list($this->ns, $short_class, $this->short) = ToolKit::splitNames($name);
+	    $this->class_name = $this->ns.'\\'.$short_class;
     }
+
+	public function setClass($class) {
+		$this->class = $class;
+		return $this;
+	}
 
     public function __toString() {
         return 'method '.$this->name;
@@ -36,13 +38,12 @@ class EntityMethod extends EntityFunction {
         return parent::dump($tab)."  [".Flags::decode($this->flags)."]";
     }
 
-    public function scan() {
-        $func        = new \ReflectionMethod($this->class->name, $this->short);
-        $this->short = $func->getShortName();
-        $this->ns    = $func->getNamespaceName();
-        $doc         = $func->getDocComment();
-        $params      = [];
-
+	/**
+	 * @param \ReflectionFunctionAbstract $reflection if null — scan itself
+	 * @return $this
+	 */
+	public function scan(\ReflectionFunctionAbstract $reflection = null) {
+        $func        = $reflection ?: new \ReflectionMethod($this->class_name, $this->short);
         if($func->isPrivate()) {
             $this->flags |= Flags::IS_PRIVATE;
         } elseif($func->isProtected()) {
@@ -57,18 +58,18 @@ class EntityMethod extends EntityFunction {
 
         if($func->isAbstract()) {
             $this->flags |= Flags::IS_ABSTRACT;
-            $this->class->flags |= Flags::IS_ABSTRACT_IMPLICIT;
+	        if($this->class) {
+                $this->class->flags |= Flags::IS_ABSTRACT_IMPLICIT;
+	        }
         } elseif($func->isFinal()) {
             $this->flags |= Flags::IS_FINAL;
         }
 
-        if($doc) {
-            $params = $this->_parseDocBlock($doc);
-        }
         if(isset($this->options['deprecated'])) {
             $this->flags |= Flags::IS_DEPRECATED;
         }
-        $this->_parseParams($func->getParameters(), $params);
+        parent::scan($func);
+		return $this;
     }
 
     public function isAbstract() {

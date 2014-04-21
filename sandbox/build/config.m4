@@ -1,4 +1,4 @@
-dnl Koda compiler, 2014-04-05 13:17:30.
+dnl Koda compiler, 2014-04-22 00:05:26.
 
 PHP_ARG_WITH(koda_sandbox, for koda/sandbox support,
 [  --with-koda-sandbox             Include koda/sandbox support])
@@ -17,5 +17,5 @@ fi
 if test "$PHP_KODA_SANDBOX" != "no"; then
     PHP_ADD_INCLUDE(.)
     PHP_SUBST(KODA_SANDBOX_SHARED_LIBADD)
-    PHP_NEW_EXTENSION(koda_sandbox, koda_helper.c php_koda_sandbox.c Koda/Sandbox/Names.c Koda/Sandbox/NamesInterface.c KodaSandbox/Names.c, $ext_shared,, $CFLAGS)
+    PHP_NEW_EXTENSION(koda_sandbox, koda_helper.c php_koda_sandbox.c Koda/Sandbox/Names.c Koda/Sandbox/NamesInterface.c KodaSandbox/Names.c Koda/Sandbox/Returns.c, $ext_shared,, $CFLAGS)
 fi

@@ -15,6 +15,19 @@ class Scope {
     }
 
     public function convert() {
-        dump($this->function->stmts);
+        foreach($this->function->stmts as $stmt) {
+//            drop(get_class($stmt));
+        }
+//        drop($this->function->stmts);
+    }
+
+    public function stmtReturn($value) {
+        if($value->is_const) {
+            switch($value->type) {
+
+            }
+        } else {
+            return "RETURN_ZVAL($value, 1);";
+        }
     }
 }

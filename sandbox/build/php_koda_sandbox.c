@@ -17,9 +17,9 @@ BEGIN_EXTERN_C();
 #endif
 /* Global functions */
 
-/* proto function Koda\Sandbox\simple_multi(double $x, int $y = 5):bool */
+/* proto function Koda\Sandbox\simple_multi(double $x, int $y = 5):boolean */
 PHP_FUNCTION(simple_multi) {
-    // coming soon ...
+    
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_simple_multi, 0, 0,  1)
@@ -27,9 +27,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_simple_multi, 0, 0,  1)
     ZEND_ARG_TYPE_INFO(0, y, IS_LONG, 1) // int $y = 5
 ZEND_END_ARG_INFO();
 
-/* proto function KodaSandbox\simple_div(double $x, int $y = 5, boolean $allow_zero = false):bool */
+/* proto function KodaSandbox\simple_div(double $x, int $y = 5, boolean $allow_zero = false):boolean */
 PHP_FUNCTION(simple_div) {
-    // coming soon ...
+    
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_simple_div, 0, 0,  1)
@@ -66,7 +66,7 @@ zend_module_entry koda_sandbox_module_entry = {
     NULL,  // on start request callback
     NULL,  // on end request callback
     PHP_MINFO(koda_sandbox),  // info for phpinfo()
-    "0.3",  // module version
+    "0.2-0-gf1847a6",  // module version
     STANDARD_MODULE_PROPERTIES  // id, flags, ...
 };
 
@@ -84,9 +84,11 @@ PHP_MINIT_FUNCTION(koda_sandbox) {
     STARTUP_MODULE(init_Koda_Sandbox_Names); // init Koda\Sandbox\Names
     STARTUP_MODULE(init_Koda_Sandbox_NamesInterface); // init Koda\Sandbox\NamesInterface
     STARTUP_MODULE(init_KodaSandbox_Names); // init KodaSandbox\Names
+    STARTUP_MODULE(init_Koda_Sandbox_Returns); // init Koda\Sandbox\Returns
     STARTUP_MODULE(load_Koda_Sandbox_Names); // load Koda\Sandbox\Names
     STARTUP_MODULE(load_Koda_Sandbox_NamesInterface); // load Koda\Sandbox\NamesInterface
     STARTUP_MODULE(load_KodaSandbox_Names); // load KodaSandbox\Names
+    STARTUP_MODULE(load_Koda_Sandbox_Returns); // load Koda\Sandbox\Returns
 
     return SUCCESS;
 }
@@ -96,7 +98,7 @@ PHP_MINFO_FUNCTION(koda_sandbox) {
 
     php_info_print_table_start();
     php_info_print_table_header(2, "koda/sandbox support", "enabled");
-    php_info_print_table_header(2, "koda/sandbox version", "0.3");
+    php_info_print_table_header(2, "koda/sandbox version", "0.2-0-gf1847a6");
     php_info_print_table_header(2, "koda/sandbox with Koda", "0.1");
 #ifdef KODA_SANDBOX_DEBUG
     php_info_print_table_header(2, "koda/sandbox with debug", "yes");

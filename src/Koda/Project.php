@@ -8,6 +8,8 @@ use Koda\Entity\EntityFile;
 use Koda\Entity\EntityFunction;
 use Koda\Entity\EntityGlobal;
 use Koda\Entity\EntityModule;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -109,12 +111,16 @@ class Project implements EntityInterface {
             }
         }
         foreach($paths as $dir) {
+            $dir = realpath($dir);
             if(is_file($dir)) {
-                $project->files[realpath($dir)] = new EntityFile(realpath($dir), $project);
+                $project->files[$dir] = new EntityFile($dir, $project);
             } else {
-                foreach(Finder::create()->files()->followLinks()->name('/\.php$/iS')->in($path."/".$dir) as $file) {
-                    /* @var $file \SplFileInfo */
-                    $project->files[$file->getRealPath()] = new EntityFile($file->getRealPath(), $project);
+                $iter = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir));
+                foreach($iter as $file) {
+                    /* @var \splFileInfo $file */
+                    if($file->isFile() && strtolower($file->getExtension()) == "php") {
+                        $project->files[$file->getRealPath()] = new EntityFile($file->getRealPath(), $project);
+                    }
                 }
             }
         }
@@ -228,7 +234,7 @@ class Project implements EntityInterface {
     private function _resolveDepend(\ReflectionClass $class) {
         if($class->isInternal()) {
             $this->addDepends($class->getExtensionName());
-            return new EntityClass($class->getName(), null, [null, 0]);
+            return new EntityClass($class->getName());
         } elseif(isset($this->classes[$class->getName()])) {
             return $this->classes[$class->getName()];
         } else {
