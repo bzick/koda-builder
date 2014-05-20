@@ -56,34 +56,30 @@ class Koda {
 	}
 
 	/**
-	 * Specify the path to the extension will be generated. By default it is build/
-	 * @param string $path
+	 * Convert PHP library to PHP extension sources.
+	 * @param string $path Path to the sources will be converted. By default is build/
 	 */
 	public function setConvert($path = null) {
 		$this->convert_path = $path ?: $this->root.'/build';
 	}
 
 	/**
-	 * Specify the path to the extension will be compiled as .so. By default it is build/modules/<project_name>.so
-	 * @param string $path
+     * Build PHP extension sources to shared library
+	 * @param string $path Path of final extension file. By default is build/modules/<project_name>.so
 	 */
-	public function setExtensionPath($path) {
+	public function setCompile($path = null) {
+		$this->compile = true;
 		$this->ext_path = $path;
 	}
 
-	/**
-	 * Specify the path to the markdown documentation will be generated. By default it is docs/
-	 * @param string $path
-	 */
-	public function setMdocs($path = null) {
+    /**
+     * Generate markdown documentation
+     * @param string $path path for documentation. By default is docs/
+     * @param bool $index Add index.html file into documentation for html representation
+     */
+	public function setMdocs($path = null, $index = false) {
 		$this->mdocs_path = $path ?: $this->root.'/docs';
-	}
-
-	/**
-	 * Add index.html file into documentation for html representation
-	 */
-	public function addMdocsIndex() {
-		$this->mdocs_index = true;
+        $this->mdocs_index = $index;
 	}
 
 	/**
@@ -93,6 +89,23 @@ class Koda {
 	public function getVersion() {
 		return self::VERSION_STRING;
 	}
+
+    /**
+     * Dump project to stdout
+     * @return string
+     */
+    public function getDump() {
+        $project = \Koda\Project::composer($this->root);
+        $project->scan();
+        return ToolKit::dump($project);
+    }
+
+    /**
+     * Get project stats
+     */
+    public function getStats() {
+
+    }
 
     /**
      * Dispatch CLI request

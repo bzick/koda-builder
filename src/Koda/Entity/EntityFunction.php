@@ -50,7 +50,7 @@ class EntityFunction implements EntityInterface {
      */
     public $arguments = [];
     public $statics;
-    public $stmts;
+    public $stmts = [];
 
     /**
      * @param string $name
@@ -60,14 +60,28 @@ class EntityFunction implements EntityInterface {
 	    list($this->ns, $this->short) = ToolKit::splitNames($name);
     }
 
-	public function setAliases($aliases) {
+	/**
+	 * @param array $aliases
+	 * @return $this
+	 */
+	public function setAliases(array $aliases) {
 		$this->aliases = $aliases;
+		return $this;
 	}
 
+	/**
+	 * @param $line
+	 * @return $this
+	 */
 	public function setLine($line) {
 		$this->line = $line;
+		return $this;
 	}
 
+	/**
+	 * @param string $desc
+	 * @return $this
+	 */
 	public function setDescription($desc) {
 		$this->description = $desc;
 		return $this;
@@ -143,8 +157,8 @@ class EntityFunction implements EntityInterface {
         /* @var \ReflectionParameter[] $params */
         foreach($params as $param) {
             $argument = new EntityArgument($this, $param->name);
-            if(isset($doc_params[ $param->name ])) {
-                $argument->description = $doc_params[ $param->name ];
+            if(isset($doc_params[ $param->name ]["desc"])) {
+                $argument->description = $doc_params[ $param->name ]["desc"];
             }
             $argument->is_optional = $param->isOptional();
             $argument->allows_null = $param->allowsNull();

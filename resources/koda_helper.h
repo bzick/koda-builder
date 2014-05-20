@@ -58,6 +58,7 @@
 // todo
 #define REGISTER_CLASS_ARRAY_PROPERTY(class_entry, name, value, flags)
 
+
 /**
  * Return zend_class_entry by class name
  * @param const char *class_name class name in lowercase
@@ -81,5 +82,7 @@ extern zend_class_entry *kd_extend_class(zend_class_entry *ce TSRMLS_DC, const c
  * @return int FAILURE or SUCCESS
  **/
 extern int kd_implements_class(zend_class_entry *ce TSRMLS_DC,  int num_interfaces, ...);
+
+extern void kd_unrefs(int num_vars, ...);
 
 #endif	/* PHP_KODA_HELPER_H */

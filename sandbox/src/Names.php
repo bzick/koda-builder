@@ -16,7 +16,7 @@ namespace Koda\Sandbox {
      * @return bool
      */
     function simple_multi($x, $y = 5) {
-        return true;
+
     }
 
     class Names extends \ArrayObject implements \JsonSerializable {
@@ -86,7 +86,7 @@ namespace KodaSandbox {
      * @return bool
      */
     function simple_div($x, $y = 5, $allow_zero = false) {
-        return true;
+
     }
 
 

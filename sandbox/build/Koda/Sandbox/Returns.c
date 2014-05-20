@@ -10,75 +10,15 @@ BEGIN_EXTERN_C();
 
 /* proto function Koda\Sandbox\Returns::returnInt():void  [public] */
 PHP_METHOD(Koda_Sandbox_Returns, returnInt) {
-    // coming soon
+    RETURN_LONG(5);
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_returnInt, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
-
-/* proto function Koda\Sandbox\Returns::returnDouble():void  [public] */
-PHP_METHOD(Koda_Sandbox_Returns, returnDouble) {
-    // coming soon
-}
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_returnDouble, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-
-/* proto function Koda\Sandbox\Returns::returnNegative():void  [public] */
-PHP_METHOD(Koda_Sandbox_Returns, returnNegative) {
-    // coming soon
-}
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_returnNegative, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-
-/* proto function Koda\Sandbox\Returns::returnString():void  [public] */
-PHP_METHOD(Koda_Sandbox_Returns, returnString) {
-    // coming soon
-}
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_returnString, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-
-/* proto function Koda\Sandbox\Returns::returnTrue():void  [public] */
-PHP_METHOD(Koda_Sandbox_Returns, returnTrue) {
-    // coming soon
-}
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_returnTrue, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-
-/* proto function Koda\Sandbox\Returns::returnFalse():void  [public] */
-PHP_METHOD(Koda_Sandbox_Returns, returnFalse) {
-    // coming soon
-}
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_returnFalse, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-
-/* proto function Koda\Sandbox\Returns::returnNULL():void  [public] */
-PHP_METHOD(Koda_Sandbox_Returns, returnNULL) {
-    // coming soon
-}
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_returnNULL, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
 /* Register methods */
 static const zend_function_entry Koda_Sandbox_Returns_methods[] = {
     ZEND_ME(Koda_Sandbox_Returns, returnInt, arginfo_returnInt, ZEND_ACC_PUBLIC)
-    ZEND_ME(Koda_Sandbox_Returns, returnDouble, arginfo_returnDouble, ZEND_ACC_PUBLIC)
-    ZEND_ME(Koda_Sandbox_Returns, returnNegative, arginfo_returnNegative, ZEND_ACC_PUBLIC)
-    ZEND_ME(Koda_Sandbox_Returns, returnString, arginfo_returnString, ZEND_ACC_PUBLIC)
-    ZEND_ME(Koda_Sandbox_Returns, returnTrue, arginfo_returnTrue, ZEND_ACC_PUBLIC)
-    ZEND_ME(Koda_Sandbox_Returns, returnFalse, arginfo_returnFalse, ZEND_ACC_PUBLIC)
-    ZEND_ME(Koda_Sandbox_Returns, returnNULL, arginfo_returnNULL, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 

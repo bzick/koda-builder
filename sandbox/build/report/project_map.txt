@@ -1,5 +1,5 @@
 Project koda/sandbox {
-    version 0.2-0-gf1847a6
+    version 0.2-5-g98ceddc
     alias KodaSandbox [internal koda_sandbox]
 
     const Koda\Sandbox\FIVE = 5
@@ -48,7 +48,7 @@ Project koda/sandbox {
     }
 
     class Koda\Sandbox\Returns {
-        line: /Volumes/Data/Dev/koda/sandbox/src/Primitive.php:6
+        line: /Volumes/Data/Dev/koda/sandbox/src/Returns.php:6
         
         function Koda\Sandbox\Returns::returnInt():void  [public]
         function Koda\Sandbox\Returns::returnDouble():void  [public]
@@ -57,6 +57,7 @@ Project koda/sandbox {
         function Koda\Sandbox\Returns::returnTrue():void  [public]
         function Koda\Sandbox\Returns::returnFalse():void  [public]
         function Koda\Sandbox\Returns::returnNULL():void  [public]
+        function Koda\Sandbox\Returns::returnVar(mixed $a):void  [public]
     }
 
 

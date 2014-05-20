@@ -38,3 +38,13 @@ int kd_implements_class(zend_class_entry *ce TSRMLS_DC, int num_interfaces, ...)
 	va_end(interface_list);
 	return SUCCESS;
 }
+
+void kd_unrefs(int num_vars, ...) {
+	zval *var;
+	va_list vars_list;
+    va_start(vars_list, num_vars);
+	while (num_vars--) {
+        var = va_arg(vars_list, zval *);
+//		zend_del_ref(var);
+    }
+}

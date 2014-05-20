@@ -25,7 +25,7 @@ class EntityFile {
 
     public function __construct($path) {
         $this->path = $path;
-        require $path;
+        require_once $path;
     }
 
     public function scan() {

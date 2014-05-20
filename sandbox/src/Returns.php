@@ -5,11 +5,11 @@ namespace Koda\Sandbox;
 
 class Returns {
     public function returnInt() {
-        return 2;
+        return 5;
     }
 
     public function returnDouble() {
-        return 2.5;
+        return 5.5;
     }
 
     public function returnNegative() {
@@ -31,4 +31,8 @@ class Returns {
     public function returnNULL() {
         return null;
     }
+
+	public function returnVar($a) {
+		return $a;
+	}
 }

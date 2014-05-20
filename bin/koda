@@ -1,6 +1,9 @@
 #!/usr/bin/env php
 <?php
 
+ini_set("memory_limit", "1G");
+error_reporting(-1);
+
 foreach(['../vendor/autoload.php', '../../../../autoload.php'] as $loader) {
 	$loader = realpath(__DIR__.'/'.$loader);
     if(file_exists($loader)) {
@@ -15,5 +18,6 @@ if(!defined('KODA_COMPOSER_LOADER')) {
 }
 
 $koda = new Koda(getcwd());
-Koda\CLI::configure($koda);
-$koda->dispatch();
+if(Koda\CLI::configure($koda)) {
+    $koda->dispatch();
+}

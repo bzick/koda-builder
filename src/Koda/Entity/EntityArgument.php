@@ -21,7 +21,7 @@ class EntityArgument implements EntityInterface {
     public $is_optional;
     public $default_value;
     public $position;
-    public $type;
+    public $type = 0;
     public $instance_of;
     public $allows_null;
     public $hint;

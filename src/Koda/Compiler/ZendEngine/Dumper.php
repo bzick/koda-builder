@@ -544,12 +544,13 @@ TOP;
                     $arginfo = "";
                 }
                 if(!$method->isAbstract()) {
-
+	                $scope = new Scope($method);
+	                $body = $scope->convert();
                     echo <<<METHOD
 
 /* proto {$method->dump()} */
 PHP_METHOD({$name}, {$method->short}) {
-    // coming soon
+    {$body}
 }
 
 METHOD;
