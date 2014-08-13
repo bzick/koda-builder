@@ -5,6 +5,7 @@ namespace Koda;
 
 use Koda\Entity\EntityArgument;
 use Koda\Entity\EntityClass;
+use Koda\Entity\EntityFile;
 use Koda\Entity\EntityMethod;
 use Koda\Entity\Types;
 
@@ -45,25 +46,41 @@ class CLI {
 				$about = (new EntityMethod($ce->name.'::'.$method->name))->setClass($ce)->scan();
                 $req = [];
 				if($about->arguments) {
-					if($about->required == 0) {
-						printf("  --%-25s  %s\n", $name, $about->description);
-                        $req[] = $name;
-					}
+                    $first = true;
+//					if($about->required == 0) {
+//						printf("  --%-25s  %s\n", $name, $about->description);
+//                        $req[] = $name;
+//					}
 					foreach($about->arguments as $argument) {
+                        $description = $argument->description.($req ? " (required --".implode(", --", $req).")" : "");
 						/* @var EntityArgument $argument */
 						if($argument->isOptional()) {
-							$arg_name = $name.".".$argument->name."=".strtoupper(Types::getTypeCode($argument->type));
-                            printf("  --%-25s  %s\n", $arg_name, $argument->description." (required --".implode(", --", $req).")");
+                            if($first) {
+                                $first = false;
+                                $arg_name = $name."[=".strtoupper($argument->name)."]";
+                                $description = $about->description.sprintf("\n  %-27s  %s — %s", "", strtoupper($argument->name), $argument->description);
+                            } else {
+                                $arg_name = $name.".".$argument->name."=".strtoupper(Types::getTypeCode($argument->type));
+                            }
+                            printf("  --%-25s  %s\n", $arg_name, $description);
                         } else {
-                            $arg_name = $name.".".$argument->name;
+//                            $arg_name = $name.".".$argument->name;
+                            if($first) {
+                                $first = false;
+                                $arg_name = $name."=".strtoupper($argument->name);
+                                $description = $about->description.sprintf("\n  %-27s  %s — %s\n", "", strtoupper($argument->name), $argument->description);
+                            } else {
+                                $arg_name = $name.".".$argument->name."=".strtoupper(Types::getTypeCode($argument->type));
+                            }
                             $req[] = $arg_name;
-                            printf("  --%-25s  %s\n", $arg_name, $argument->description);
+                            printf("  --%-25s  %s\n", $arg_name, $description);
                         }
 					}
 				} else {
 					printf("  --%-25s  %s\n", $name, $about->description);
 				}
 			}
+            echo "\nKoda ".\Koda::VERSION_STRING." by Ivan [Bzick] Shalganov\n";
             return false;
 		}
 		foreach($options as $option => $values) {
@@ -91,14 +108,15 @@ class CLI {
      * @throws \InvalidArgumentException
      */
     private static function _call(array $callback, array $params, $option) {
-        $about = (new EntityMethod(get_class($callback[0]).'::'.$callback[1]))->scan();
+        $about = new EntityMethod(get_class($callback[0]).'::'.$callback[1]);
+        EntityFile::parseCallable($about, new \ReflectionMethod(get_class($callback[0]), $callback[1]));
         $args = [];
         foreach($about->arguments as $name => $arg) {
             if(array_key_exists($name, $params)) {
                 $args[] = $params[$name];
                 unset($params[$name]);
             } elseif($arg->isOptional()) {
-                $args[] = $arg->default_value;
+                $args[] = $arg->getValue();
             } else {
                 throw new \InvalidArgumentException("Required option --$option.$name");
             }

@@ -32,6 +32,12 @@ class Project implements EntityInterface {
      * @var string
      */
     public $code;
+
+    /**
+     * Project's root directory
+     * @var string
+     */
+    public $root;
     /**
      * Project version
      * Версия проекта
@@ -75,10 +81,12 @@ class Project implements EntityInterface {
      * @return Project
      */
     public static function composer($path) {
+        $path = realpath($path);
         chdir($path);
         $composer = json_decode(FS::get($path."/composer.json"), true);
         require_once $path.'/vendor/autoload.php';
         $project = new self($composer["name"]);
+        $project->setRootDir($path);
         list($vendor, $name) = explode("/", $project->name);
         if($vendor == $name) {
             $project->alias = ucfirst($name);
@@ -134,6 +142,13 @@ class Project implements EntityInterface {
         $this->name = $name;
         $this->global = new EntityGlobal($this);
         $this->classes = new \ArrayObject();
+    }
+
+    /**
+     * @param string $dir absolute path to project
+     */
+    public function setRootDir($dir) {
+        $this->root = $dir;
     }
 
     /**

@@ -16,6 +16,20 @@ class Types {
     const NIL      = 8;
     const CALLBACK = 9;
 
+    /**
+     * @var array of native types with priorities. true - scalar, false - complex.
+     */
+    public static $native = array(
+        "int" => true,
+        "bool" => true,
+        "float" => true,
+        "string" => true,
+        "array" => false,
+        "NULL" => true,
+        "resource" => false,
+        "callable" => false
+    );
+
     public static $codes = [
         "mixed" => self::MIXED,
         "bool" => self::BOOLEAN,
@@ -28,7 +42,7 @@ class Types {
         "array" => self::ARR,
         "object" => self::OBJECT,
         "resource" => self::RESOURCE,
-        "null" => self::NIL,
+        "NULL" => self::NIL,
         "callable" => self::CALLBACK,
         "callback" => self::CALLBACK,
     ];
@@ -44,6 +58,19 @@ class Types {
         self::RESOURCE => "resource",
         self::NIL => "null",
         self::CALLBACK => "callable",
+    ];
+
+    public static $complex = [
+        self::MIXED    => true,
+        self::BOOLEAN  => false,
+        self::INT      => false,
+        self::DOUBLE   => false,
+        self::STRING   => false,
+        self::ARR      => true,
+        self::OBJECT   => true,
+        self::RESOURCE => true,
+        self::NIL      => false,
+        self::CALLBACK => true,
     ];
 
     public static function detectType($value) {

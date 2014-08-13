@@ -1,5 +1,5 @@
 Project koda/sandbox {
-    version 0.2-5-g98ceddc
+    version 0.2-6-g16c6f54
     alias KodaSandbox [internal koda_sandbox]
 
     const Koda\Sandbox\FIVE = 5

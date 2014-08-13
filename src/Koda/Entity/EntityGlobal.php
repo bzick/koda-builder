@@ -3,10 +3,9 @@
 namespace Koda\Entity;
 
 
-use Koda\EntityInterface;
 use Koda\Project;
 
-class EntityGlobal implements EntityInterface {
+class EntityGlobal extends EntityAbstract {
     /**
      * @var Project
      */

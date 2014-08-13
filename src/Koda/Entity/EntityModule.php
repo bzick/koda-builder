@@ -2,15 +2,11 @@
 
 namespace Koda\Entity;
 
-
-use Koda\EntityInterface;
-
-class EntityModule implements  EntityInterface {
+class EntityModule extends EntityAbstract {
     const DEP_REQUIRE = 1;
     const DEP_CONFLICTS = 2;
     const DEP_OPTIONAL = 3;
 
-    public $name;
     public $version;
     public $type = self::DEP_REQUIRE;
 

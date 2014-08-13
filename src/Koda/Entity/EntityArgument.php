@@ -2,33 +2,36 @@
 
 namespace Koda\Entity;
 
-use Koda\EntityInterface;
 
-class EntityArgument implements EntityInterface {
-
-    /**
-     * @var string
-     */
-    public $name;
-    /**
-     * @var string
-     */
-    public $description;
+class EntityArgument extends EntityAbstract {
+    use DefaultValueTrait;
     public $is_ref = false;
     /**
      * @var bool
      */
     public $is_optional;
-    public $default_value;
     public $position;
-    public $type = 0;
     public $instance_of;
     public $allows_null;
+    /**
+     * @var int
+     */
+    public $cast;
+    /**
+     * @var string
+     */
     public $hint;
+    /**
+     * @var EntityFunction
+     */
+    public $function;
 
-    public function __construct(EntityFunction $function, $name) {
-        $this->function = $function;
+    public function __construct($name) {
         $this->name = $name;
+    }
+
+    public function setFunction(EntityFunction $function) {
+        $this->function = $function;
     }
 
     public function isRef() {
@@ -41,7 +44,43 @@ class EntityArgument implements EntityInterface {
         } else {
             $type = Types::getTypeCode($this->type);
         }
-        return $type.' '.($this->is_ref ? '&' : '').'$'.$this->name.($this->is_optional ? ' = '.var_export($this->default_value, true) : '');
+        return $type.' '.($this->is_ref ? '&' : '').'$'.$this->name.($this->is_optional ? ' = '.var_export($this->value, true) : '');
+    }
+
+    /**
+     * @param bool $is_optional
+     * @return $this
+     */
+    public function setOptional($is_optional) {
+        $this->is_optional = $is_optional;
+        return $this;
+    }
+
+    /**
+     * @param bool $allows_null
+     * @return $this
+     */
+    public function setNullAllowed($allows_null) {
+        $this->allows_null = $allows_null;
+        return $this;
+    }
+
+    /**
+     * @param bool $by_ref
+     * @return $this
+     */
+    public function setByRef($by_ref) {
+        $this->is_ref = $by_ref;
+        return $this;
+    }
+
+    /**
+     * @param int $type
+     * @param string $hint
+     */
+    public function setCast($type, $hint = null) {
+        $this->cast = $type;
+        $this->hint = $hint;
     }
 
     public function allowsNull() {

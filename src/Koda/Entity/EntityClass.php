@@ -3,20 +3,21 @@
 namespace Koda\Entity;
 
 
-use Koda\EntityInterface;
+use Koda\ToolKit;
 
 /**
  * Entity of the class
  * @package Koda\Entity
  */
-class EntityClass implements EntityInterface {
+class EntityClass  extends EntityAbstract {
+    use FlagsTrait;
     /**
      * Parent class (extend keyword)
      * @var EntityClass
      */
     public $parent;
     /**
-     * Parent class for interface (extend keyword)
+     * Parents class for interface (extend keyword)
      * @var EntityClass[]
      */
     public $parents;
@@ -31,10 +32,9 @@ class EntityClass implements EntityInterface {
      */
     public $traits = [];
     /**
-     * Class flags
-     * @var int
+     * @var
      */
-    public $flags = 0;
+    public $author;
     /**
      * List of properties
      * @var EntityProperty[]
@@ -61,11 +61,6 @@ class EntityClass implements EntityInterface {
      */
     public $aliases;
     /**
-     * Full name of the class (with namespace)
-     * @var string
-     */
-    public $name;
-    /**
      * Short name of the class (without namespace)
      * @var string
      */
@@ -90,73 +85,28 @@ class EntityClass implements EntityInterface {
      * @param string $class
      */
     public function __construct($class) {
-        $ref           = new \ReflectionClass($class);
-        $this->short   = $ref->getShortName();
-        $this->ns      = $ref->getNamespaceName();
-
         $this->name    = $class;
+        list($this->ns, $this->short) = ToolKit::splitNames($class);
         $this->cname   = str_replace('\\', '_', $class);
         $this->escaped = addslashes($class);
-        $this->extension  = $ref->getExtension();
-        if($ref->isInterface()) {
-            $this->flags = Flags::IS_INTERFACE;
-        } elseif($ref->isTrait()) {
-            $this->flags = Flags::IS_TRAIT;
-        } else {
-            $this->flags = Flags::IS_CLASS;
-        }
-        if($ref->isAbstract()) {
-            $this->flags |= Flags::IS_ABSTRACT;
-        } elseif($ref->isFinal()) {
-            $this->flags |= Flags::IS_FINAL;
-        }
-    }
-
-	/**
-	 * @param $line
-	 */
-	public function setLine($line) {
-		$this->line = $line;
-	}
-
-    /**
-     * Checks if the class is an interface
-     * @return int
-     */
-    public function isInterface() {
-        return $this->flags & Flags::IS_INTERFACE;
+//        $this->extension  = $ref->getExtension();
     }
 
     /**
-     * Checks if the class is an trait
-     * @return int
+     * @param string $name
+     * @return $this
      */
-    public function isTrait() {
-        return $this->flags & Flags::IS_TRAIT;
+    public function addAuthor($name) {
+        $this->author[] = $name;
+        return $this;
     }
 
     /**
-     * Checks if the class is an plain class
-     * @return int
+     * @param array $options
+     * @return $this
      */
-    public function isClass() {
-        return $this->flags & Flags::IS_CLASS;
-    }
-
-    /**
-     * Checks if the class is an final class
-     * @return int
-     */
-    public function isFinal() {
-        return $this->flags & Flags::IS_FINAL;
-    }
-
-    /**
-     * Checks if the class is an abstract class or interface
-     * @return int
-     */
-    public function isAbstract() {
-        return $this->flags & Flags::IS_ABSTRACT;
+    public function addOptions(array $options) {
+        return $this;
     }
 
 	/**
@@ -199,34 +149,39 @@ class EntityClass implements EntityInterface {
 
     /**
      * Add constant
-     * @param string $name
-     * @param array $line
+     * @param EntityConstant $constant
      * @return EntityConstant
      */
-    public function addConstant($name, $line) {
-        return $this->constants[$name] = new EntityConstant($this->name.'::'.$name, constant($this->name.'::'.$name), $line, $this);
-    }
-    /**
-     * Add property
-     * @param string $name
-     * @param array $line
-     * @return EntityProperty
-     */
-    public function addProperty($name, $line) {
-        return $this->properties[$name] = new EntityProperty($name, $line, $this);
+    public function addConstant(EntityConstant $constant) {
+        return $this->constants[$constant->name] = $constant->setClass($this);
     }
 
     /**
+     * Add property
+     * @param EntityProperty $property
+     * @return EntityProperty
+     */
+    public function addProperty(EntityProperty $property) {
+        return $this->properties[$property->name] = $property->setClass($this);
+    }
+
+//    public function _addProperty($name, $line) {
+//        return $this->properties[$name] = new EntityProperty($name, $line, $this);
+//    }
+
+    /**
      * Add method
-     * @param string $name method name (without class name)
-     * @param array $line
+     * @param EntityMethod $method
      * @return EntityMethod
      */
-    public function addMethod($name, $line) {
-        $method = new EntityMethod($this->name.'::'.$name, $this->aliases, $line, $this);
-        $this->methods[$name] = $method;
-        return $method;
+    public function addMethod(EntityMethod $method) {
+        return $this->methods[$method->name] = $method->setClass($this);
     }
+//    public function _addMethod($name, $line) {
+//        $method = new EntityMethod($this->name.'::'.$name, $this->aliases, $line, $this);
+//        $this->methods[$name] = $method;
+//        return $method;
+//    }
 
     /**
      * @inheritdoc
@@ -248,7 +203,7 @@ class EntityClass implements EntityInterface {
      */
     public function dump($tab = "") {
         $inf = [
-            "line: {$this->line[0]}:{$this->line[1]}"
+            "line: {$this->line}"
         ];
         if($this->parent) {
             $inf[] = "parent: {$this->parent->name}";
