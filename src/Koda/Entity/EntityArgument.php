@@ -16,7 +16,7 @@ class EntityArgument extends EntityAbstract {
     /**
      * @var int
      */
-    public $cast;
+    public $cast = 0;
     /**
      * @var string
      */
@@ -39,12 +39,12 @@ class EntityArgument extends EntityAbstract {
     }
 
     public function dump($tab = "") {
-        if($this->type == Types::OBJECT) {
-            $type = $this->instance_of;
+        if($this->cast == Types::OBJECT) {
+            $cast = $this->instance_of;
         } else {
-            $type = Types::getTypeCode($this->type);
+            $cast = Types::getTypeCode($this->cast);
         }
-        return $type.' '.($this->is_ref ? '&' : '').'$'.$this->name.($this->is_optional ? ' = '.var_export($this->value, true) : '');
+        return $cast.' '.($this->is_ref ? '&' : '').'$'.$this->name.($this->is_optional ? ' = '.var_export($this->value, true) : '');
     }
 
     /**
@@ -80,14 +80,24 @@ class EntityArgument extends EntityAbstract {
      */
     public function setCast($type, $hint = null) {
         $this->cast = $type;
-        $this->hint = $hint;
+        if($type == Types::OBJECT) {
+            $this->instance_of = $hint;
+        } elseif($type == Types::ARR) {
+            $this->hint = $hint;
+        }
     }
 
+    /**
+     * @return int
+     */
     public function allowsNull() {
         return intval($this->allows_null);
     }
 
-	public function isOptional() {
+    /**
+     * @return int
+     */
+    public function isOptional() {
 		return intval($this->is_optional);
 	}
 

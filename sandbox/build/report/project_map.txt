@@ -1,16 +1,16 @@
 Project koda/sandbox {
-    version 0.2-6-g16c6f54
+    version 0.2-7-g51a2c7f
     alias KodaSandbox [internal koda_sandbox]
 
     const Koda\Sandbox\FIVE = 5
     const Koda\Sandbox\FLOAT_FIVE = 5.5
     const Koda\Sandbox\STRING_FIVE = 'five'
     
-    function Koda\Sandbox\simple_multi(double $x, int $y = 5):boolean
-    function KodaSandbox\simple_div(double $x, int $y = 5, boolean $allow_zero = false):boolean
+    function Koda\Sandbox\simple_multi(mixed $x, mixed $y = 5):boolean
+    function KodaSandbox\simple_div(mixed $x, mixed $y = 5, mixed $allow_zero = false):boolean
 
     class Koda\Sandbox\Names {
-        line: /Volumes/Data/Dev/koda/sandbox/src/Names.php:22
+        line: src/Names.php:22
         parent: ArrayObject
         interfaces: JsonSerializable
         
@@ -22,42 +22,42 @@ Project koda/sandbox {
         prop Koda\Sandbox\Names::$float_five = 5.5 [protected]
         prop Koda\Sandbox\Names::$string_five = 'five' [static private]
         
-        function Koda\Sandbox\Names::__construct(Koda\Sandbox\Names $self, array $list = NULL):void  [public]
-        function Koda\Sandbox\Names::publicStatic():void  [final static public]
-        function Koda\Sandbox\Names::privateStatic():void  [static private]
-        function Koda\Sandbox\Names::protectedStatic():void  [static protected]
-        function Koda\Sandbox\Names::publicMethod():void  [public]
-        function Koda\Sandbox\Names::privateMethod():void  [private]
-        function Koda\Sandbox\Names::protectedMethod():void  [protected]
-        function Koda\Sandbox\Names::__clone():void  [public]
-        function Koda\Sandbox\Names::__destruct():void  [public]
-        function Koda\Sandbox\Names::jsonSerialize():void  [public]
+        function Names::__construct(Koda\Sandbox\Names $self, mixed $list = NULL):void  [public]
+        function Names::publicStatic():void  [final static public]
+        function Names::privateStatic():void  [static private]
+        function Names::protectedStatic():void  [static protected]
+        function Names::publicMethod():void  [public]
+        function Names::privateMethod():void  [private]
+        function Names::protectedMethod():void  [protected]
+        function Names::__clone():void  [public]
+        function Names::__destruct():void  [public]
+        function Names::jsonSerialize():void  [public]
     }
 
     interface Koda\Sandbox\NamesInterface [abstract] {
-        line: /Volumes/Data/Dev/koda/sandbox/src/Names.php:74
+        line: src/Names.php:74
         parents: Traversable, Iterator
         
-        function Koda\Sandbox\NamesInterface::gonnaDo():void  [abstract public]
+        function NamesInterface::gonnaDo():void  [abstract public]
     }
 
     class KodaSandbox\Names [abstract] {
-        line: /Volumes/Data/Dev/koda/sandbox/src/Names.php:93
+        line: src/Names.php:93
         
-        function KodaSandbox\Names::abstractMethod():void  [abstract public]
+        function Names::abstractMethod():void  [abstract public]
     }
 
     class Koda\Sandbox\Returns {
-        line: /Volumes/Data/Dev/koda/sandbox/src/Returns.php:6
+        line: src/Returns.php:6
         
-        function Koda\Sandbox\Returns::returnInt():void  [public]
-        function Koda\Sandbox\Returns::returnDouble():void  [public]
-        function Koda\Sandbox\Returns::returnNegative():void  [public]
-        function Koda\Sandbox\Returns::returnString():void  [public]
-        function Koda\Sandbox\Returns::returnTrue():void  [public]
-        function Koda\Sandbox\Returns::returnFalse():void  [public]
-        function Koda\Sandbox\Returns::returnNULL():void  [public]
-        function Koda\Sandbox\Returns::returnVar(mixed $a):void  [public]
+        function Returns::returnInt():void  [public]
+        function Returns::returnDouble():void  [public]
+        function Returns::returnNegative():void  [public]
+        function Returns::returnString():void  [public]
+        function Returns::returnTrue():void  [public]
+        function Returns::returnFalse():void  [public]
+        function Returns::returnNULL():void  [public]
+        function Returns::returnVar(mixed $a):void  [public]
     }
 
 

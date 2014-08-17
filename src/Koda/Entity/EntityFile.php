@@ -255,12 +255,15 @@ class EntityFile {
         $doc         = $reflection->getDocComment();
         $params      = [];
 
+
         if($doc) {
             $info = ToolKit::parseDoc($doc);
             $callable->setDescription($info['desc']);
             $callable->setReturnInfo($info['return']['type'], $reflection->returnsReference(), $info['return']['desc']);
             $callable->setOptions($info['options']);
             $params = $info["params"];
+        } else {
+            $info = [];
         }
         /* @var \ReflectionParameter[] $params */
         foreach($reflection->getParameters() as $param) {
@@ -268,7 +271,9 @@ class EntityFile {
             if(isset($params[ $param->name ]["desc"])) {
                 $argument->description = $params[ $param->name ]["desc"];
             }
-            $argument->setLine($callable->getLine());
+            if($callable->getLine()) {
+                $argument->setLine($callable->getLine());
+            }
             $argument->setOptional($param->isOptional());
             $argument->setNullAllowed($param->allowsNull());
             $argument->setValue($param->isDefaultValueAvailable() ? $param->getDefaultValue() : null, $param->isPassedByReference());
@@ -279,15 +284,15 @@ class EntityFile {
             }
             if($c = $param->getClass()) {
                 $argument->setCast(Types::OBJECT, $c->name);
-            } elseif(isset($doc_params[ $param->name ])) {
-                $_type = $doc_params[ $param->name ]["type"];
+            } elseif(isset($info['params'][ $param->name ])) {
+                $_type = $info['params'][ $param->name ]["type"];
                 if(strpos($_type, "|") || $_type === "mixed") { // multiple types or mixed
                     $argument->setCast(Types::MIXED);
                 } else {
                     if(strpos($_type, "[]")) {
                         $argument->setCast(Types::ARR, rtrim($_type, '[]'));
                     }
-                    if(isset(Types::$native[$_type])) {
+                    if(isset(Types::$codes[$_type])) {
                         $argument->setCast(Types::getType($_type));
                     } else {
                         $argument->setCast(Types::OBJECT, ltrim($_type,'\\'));
@@ -295,7 +300,6 @@ class EntityFile {
                 }
             } else {
                 $argument->warning("not documented");
-                $argument->setCast(Types::MIXED);
             }
             $callable->pushArgument($argument);
         }

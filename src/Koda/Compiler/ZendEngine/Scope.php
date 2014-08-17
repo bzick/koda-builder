@@ -4,6 +4,7 @@ namespace Koda\Compiler\ZendEngine;
 
 use Koda\Entity\EntityFunction;
 use Koda\Entity\Types;
+use Koda\Tokenizer;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Scalar;
 use PhpParser\Node\Stmt\Return_;
@@ -24,14 +25,27 @@ class Scope {
     }
 
     public function convert() {
-        return $this->statments($this->function->stmts);
+        if(!$this->function->tokens) { // empty body
+            return "";
+        }
+        $tokens = $this->function->tokens;
+        while($tokens->valid()) {
+            if($tokens->is(Tokenizer::MACRO_STRING)) {
+                $stmt = $tokens->getStmtName();
+                $this->{"parse$stmt"}($tokens);
+            } else {
+                $this->parseExpression($tokens);
+            }
+        }
+        return "";
+//        return $this->statments($this->function->stmts);
     }
 
 	/**
 	 * @param array $stmts
 	 * @return string
 	 */
-	public function statments(array $stmts) {
+	public function statements(array $stmts) {
 		$lines = [];
 		foreach($stmts as $stmt) {
 			/* @var \PhpParser\Node $stmt */

@@ -4,7 +4,7 @@
 extern zend_module_entry koda_sandbox_module_entry;
 #define phpext_koda_sandbox_ptr &koda_sandbox_module_entry
 
-#define PHP_KODA_SANDBOX_VERSION "0.2-6-g16c6f54"
+#define PHP_KODA_SANDBOX_VERSION "0.2-7-g51a2c7f"
 
 /* Global functions */
 PHP_FUNCTION(php_simple_multi);

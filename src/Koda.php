@@ -135,8 +135,9 @@ class Koda {
  * @param mixed $item
  */
 function dump($item) {
-    echo ToolKit::dump($item)."\n";
-    echo (new Exception())->getTraceAsString()."\n";
+//    ob_end_clean();
+    error_log(ToolKit::dump($item)."\n");
+    error_log((new Exception())->getTraceAsString()."\n");
 }
 
 /**
@@ -144,7 +145,8 @@ function dump($item) {
  * @param mixed $item
  */
 function drop($item) {
-    echo ToolKit::dump($item)."\n";
-    echo (new Exception())->getTraceAsString()."\n";
+//    ob_end_clean();
+    error_log(ToolKit::dump($item)."\n");
+    error_log((new Exception())->getTraceAsString()."\n");
     exit;
 }

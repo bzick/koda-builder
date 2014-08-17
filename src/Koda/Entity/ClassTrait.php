@@ -1,18 +1,19 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: bzick
- * Date: 11.08.14
- * Time: 10:03
- */
 
 namespace Koda\Entity;
 
 
 trait ClassTrait {
 
+    /**
+     * @var EntityClass
+     */
     public $class;
 
+    /**
+     * @param EntityClass $class
+     * @return $this
+     */
     public function setClass(EntityClass $class) {
         $this->class = $class;
         return $this;

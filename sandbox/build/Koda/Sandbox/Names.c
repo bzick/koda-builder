@@ -8,18 +8,18 @@ zend_object_handlers handlers_Koda_Sandbox_Names;
 
 BEGIN_EXTERN_C();
 
-/* proto function Koda\Sandbox\Names::__construct(Koda\Sandbox\Names $self, array $list = NULL):void  [public] */
+/* proto function Names::__construct(Koda\Sandbox\Names $self, mixed $list = NULL):void  [public] */
 PHP_METHOD(Koda_Sandbox_Names, __construct) {
     
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo___construct, 0, 0, 1)
-    ZEND_ARG_OBJ_INFO(0, self, "Koda\\Sandbox\\Names", 0) // Koda\Sandbox\Names $self
-    ZEND_ARG_ARRAY_INFO(0, list, 1) // array $list = NULL
+    ZEND_ARG_INFO(0, self) // Koda\Sandbox\Names $self
+    ZEND_ARG_INFO(0, list) // mixed $list = NULL
 ZEND_END_ARG_INFO();
 
 
-/* proto function Koda\Sandbox\Names::publicStatic():void  [final static public] */
+/* proto function Names::publicStatic():void  [final static public] */
 PHP_METHOD(Koda_Sandbox_Names, publicStatic) {
     
 }
@@ -28,7 +28,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_publicStatic, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
 
-/* proto function Koda\Sandbox\Names::privateStatic():void  [static private] */
+/* proto function Names::privateStatic():void  [static private] */
 PHP_METHOD(Koda_Sandbox_Names, privateStatic) {
     
 }
@@ -37,7 +37,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_privateStatic, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
 
-/* proto function Koda\Sandbox\Names::protectedStatic():void  [static protected] */
+/* proto function Names::protectedStatic():void  [static protected] */
 PHP_METHOD(Koda_Sandbox_Names, protectedStatic) {
     
 }
@@ -46,7 +46,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_protectedStatic, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
 
-/* proto function Koda\Sandbox\Names::publicMethod():void  [public] */
+/* proto function Names::publicMethod():void  [public] */
 PHP_METHOD(Koda_Sandbox_Names, publicMethod) {
     
 }
@@ -55,7 +55,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_publicMethod, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
 
-/* proto function Koda\Sandbox\Names::privateMethod():void  [private] */
+/* proto function Names::privateMethod():void  [private] */
 PHP_METHOD(Koda_Sandbox_Names, privateMethod) {
     
 }
@@ -64,7 +64,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_privateMethod, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
 
-/* proto function Koda\Sandbox\Names::protectedMethod():void  [protected] */
+/* proto function Names::protectedMethod():void  [protected] */
 PHP_METHOD(Koda_Sandbox_Names, protectedMethod) {
     
 }
@@ -73,7 +73,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_protectedMethod, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
 
-/* proto function Koda\Sandbox\Names::__clone():void  [public] */
+/* proto function Names::__clone():void  [public] */
 PHP_METHOD(Koda_Sandbox_Names, __clone) {
     
 }
@@ -82,7 +82,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo___clone, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
 
-/* proto function Koda\Sandbox\Names::__destruct():void  [public] */
+/* proto function Names::__destruct():void  [public] */
 PHP_METHOD(Koda_Sandbox_Names, __destruct) {
     
 }
@@ -91,7 +91,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo___destruct, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
 
-/* proto function Koda\Sandbox\Names::jsonSerialize():void  [public] */
+/* proto function Names::jsonSerialize():void  [public] */
 PHP_METHOD(Koda_Sandbox_Names, jsonSerialize) {
     
 }
@@ -145,7 +145,7 @@ PHP_MINIT_FUNCTION(init_Koda_Sandbox_Names) {
 /* Extending and implementing */
 PHP_MINIT_FUNCTION(load_Koda_Sandbox_Names) {
     if(!kd_extend_class(ce_Koda_Sandbox_Names TSRMLS_CC, "arrayobject")) {
-        zend_error(E_CORE_ERROR, "koda/sandbox: class Koda\\Sandbox\\Names can't extends class ArrayObject");
+        zend_error(E_CORE_ERROR, "koda/sandbox: class Koda\\Sandbox\\Names can't extends  ArrayObject");
         return FAILURE;
     }
     kd_implements_class(ce_Koda_Sandbox_Names TSRMLS_CC, 1, "jsonserializable");

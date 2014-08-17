@@ -3,6 +3,7 @@
 namespace Koda\Entity;
 
 
+use Koda\Tokenizer;
 use Koda\ToolKit;
 use PhpParser\Lexer;
 use PhpParser\Parser;
@@ -13,19 +14,9 @@ class EntityFunction extends EntityAbstract {
     protected static $entity_type = "function";
 
     /**
-     * @var array of native types with priorities
+     * @var Tokenizer
      */
-    private static $_native = array(
-        "int" => 9,
-        "bool" => 7,
-        "float" => 8,
-        "string" => 10,
-        "array" => 6,
-        "NULL" => 1,
-        "resource" => 5,
-        "callable" => 10
-    );
-
+    public $tokens;
     public $strict = true;
     public $return_type = -1;
     public $return_desc = "";
@@ -89,8 +80,9 @@ class EntityFunction extends EntityAbstract {
         $body = trim($body);
         if($body) {
             $this->body = $body;
-            $parser = new Parser(new Lexer);
-            $this->stmts = $parser->parse('<?php '.$this->body);
+            $this->tokens = new Tokenizer($body);
+//            $parser = new Parser(new Lexer);
+//            $this->stmts = $parser->parse('<?php '.$this->body);
         }
         return $this;
     }
@@ -128,5 +120,9 @@ class EntityFunction extends EntityAbstract {
 
     public function __toString() {
         return 'function '.$this->name.'('.($this->arguments ? '...' : '').')';
+    }
+
+    public function getReflection() {
+        return new \ReflectionFunction($this->name);
     }
 }

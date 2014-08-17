@@ -23,4 +23,8 @@ class EntityMethod extends EntityFunction {
     public function dump($tab = "") {
         return parent::dump($tab)."  [".Flags::decode($this->flags)."]";
     }
+
+    public function getReflection() {
+        return new \ReflectionMethod($this->class->name, $this->short);
+    }
 }

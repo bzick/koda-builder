@@ -43,7 +43,9 @@ class CLI {
 					continue;
 				}
 				$name = self::toCLIName($name);
-				$about = (new EntityMethod($ce->name.'::'.$method->name))->setClass($ce)->scan();
+//				$about = (new EntityMethod($ce->name.'::'.$method->name))->setClass($ce)->scan();
+                $about = new EntityMethod($ce->name.'::'.$method->name);
+                EntityFile::parseCallable($about, $about->setClass($ce)->getReflection());
                 $req = [];
 				if($about->arguments) {
                     $first = true;

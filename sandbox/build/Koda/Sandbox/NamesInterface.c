@@ -32,11 +32,11 @@ PHP_MINIT_FUNCTION(init_Koda_Sandbox_NamesInterface) {
 /* Extending and implementing */
 PHP_MINIT_FUNCTION(load_Koda_Sandbox_NamesInterface) {
     if(!kd_extend_class(ce_Koda_Sandbox_NamesInterface TSRMLS_CC, "traversable")) {
-        zend_error(E_CORE_ERROR, "koda/sandbox: interface Koda\\Sandbox\\NamesInterface can't extends interface Traversable");
+        zend_error(E_CORE_ERROR, "koda/sandbox: interface Koda\\Sandbox\\NamesInterface can't extends  Traversable");
         return FAILURE;
     }
     if(!kd_extend_class(ce_Koda_Sandbox_NamesInterface TSRMLS_CC, "iterator")) {
-        zend_error(E_CORE_ERROR, "koda/sandbox: interface Koda\\Sandbox\\NamesInterface can't extends interface Iterator");
+        zend_error(E_CORE_ERROR, "koda/sandbox: interface Koda\\Sandbox\\NamesInterface can't extends  Iterator");
         return FAILURE;
     }
     return SUCCESS;
