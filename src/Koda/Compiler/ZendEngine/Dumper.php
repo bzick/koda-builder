@@ -367,13 +367,13 @@ FOOTER;
             Types::DOUBLE => 'IS_DOUBLE',
             Types::RESOURCE => 'IS_RESOURCE'
         ];
-        switch($argument->type) {
+        switch($argument->cast) {
             case Types::BOOLEAN:
             case Types::STRING:
             case Types::INT:
             case Types::DOUBLE:
             case Types::RESOURCE:
-                return "ZEND_ARG_TYPE_INFO({$argument->isRef()}, {$argument->name}, {$types[$argument->type]}, {$argument->allowsNull()})";
+                return "ZEND_ARG_TYPE_INFO({$argument->isRef()}, {$argument->name}, {$types[$argument->cast]}, {$argument->allowsNull()})";
             case Types::OBJECT:
                 return "ZEND_ARG_OBJ_INFO({$argument->isRef()}, {$argument->name}, \"".addslashes($argument->instance_of)."\", {$argument->allowsNull()})";
             case Types::ARR:

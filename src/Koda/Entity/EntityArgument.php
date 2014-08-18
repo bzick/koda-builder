@@ -38,6 +38,10 @@ class EntityArgument extends EntityAbstract {
         return intval($this->is_ref);
     }
 
+    /**
+     * @param string $tab
+     * @return string
+     */
     public function dump($tab = "") {
         if($this->cast == Types::OBJECT) {
             $cast = $this->instance_of;

@@ -1,13 +1,13 @@
 Project koda/sandbox {
-    version 0.2-7-g51a2c7f
+    version 0.2-8-g028935b
     alias KodaSandbox [internal koda_sandbox]
 
     const Koda\Sandbox\FIVE = 5
     const Koda\Sandbox\FLOAT_FIVE = 5.5
     const Koda\Sandbox\STRING_FIVE = 'five'
     
-    function Koda\Sandbox\simple_multi(mixed $x, mixed $y = 5):boolean
-    function KodaSandbox\simple_div(mixed $x, mixed $y = 5, mixed $allow_zero = false):boolean
+    function Koda\Sandbox\simple_multi(double $x, int $y = 5):boolean
+    function KodaSandbox\simple_div(double $x, int $y = 5, boolean $allow_zero = false):boolean
 
     class Koda\Sandbox\Names {
         line: src/Names.php:22
@@ -22,7 +22,7 @@ Project koda/sandbox {
         prop Koda\Sandbox\Names::$float_five = 5.5 [protected]
         prop Koda\Sandbox\Names::$string_five = 'five' [static private]
         
-        function Names::__construct(Koda\Sandbox\Names $self, mixed $list = NULL):void  [public]
+        function Names::__construct(Koda\Sandbox\Names $self, array $list = NULL):void  [public]
         function Names::publicStatic():void  [final static public]
         function Names::privateStatic():void  [static private]
         function Names::protectedStatic():void  [static protected]

@@ -8,14 +8,14 @@ zend_object_handlers handlers_Koda_Sandbox_Names;
 
 BEGIN_EXTERN_C();
 
-/* proto function Names::__construct(Koda\Sandbox\Names $self, mixed $list = NULL):void  [public] */
+/* proto function Names::__construct(Koda\Sandbox\Names $self, array $list = NULL):void  [public] */
 PHP_METHOD(Koda_Sandbox_Names, __construct) {
     
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo___construct, 0, 0, 1)
-    ZEND_ARG_INFO(0, self) // Koda\Sandbox\Names $self
-    ZEND_ARG_INFO(0, list) // mixed $list = NULL
+    ZEND_ARG_OBJ_INFO(0, self, "Koda\\Sandbox\\Names", 0) // Koda\Sandbox\Names $self
+    ZEND_ARG_ARRAY_INFO(0, list, 1) // array $list = NULL
 ZEND_END_ARG_INFO();
 
 

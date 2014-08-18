@@ -17,25 +17,25 @@ BEGIN_EXTERN_C();
 #endif
 /* Global functions */
 
-/* proto function Koda\Sandbox\simple_multi(mixed $x, mixed $y = 5):boolean */
+/* proto function Koda\Sandbox\simple_multi(double $x, int $y = 5):boolean */
 PHP_FUNCTION(simple_multi) {
     
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_simple_multi, 0, 0,  1)
-    ZEND_ARG_INFO(0, x) // mixed $x
-    ZEND_ARG_TYPE_INFO(0, y, IS_LONG, 1) // mixed $y = 5
+    ZEND_ARG_TYPE_INFO(0, x, IS_DOUBLE, 1) // double $x
+    ZEND_ARG_TYPE_INFO(0, y, IS_LONG, 1) // int $y = 5
 ZEND_END_ARG_INFO();
 
-/* proto function KodaSandbox\simple_div(mixed $x, mixed $y = 5, mixed $allow_zero = false):boolean */
+/* proto function KodaSandbox\simple_div(double $x, int $y = 5, boolean $allow_zero = false):boolean */
 PHP_FUNCTION(simple_div) {
     
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_simple_div, 0, 0,  1)
-    ZEND_ARG_INFO(0, x) // mixed $x
-    ZEND_ARG_TYPE_INFO(0, y, IS_LONG, 1) // mixed $y = 5
-    ZEND_ARG_TYPE_INFO(0, allow_zero, IS_BOOL, 1) // mixed $allow_zero = false
+    ZEND_ARG_TYPE_INFO(0, x, IS_DOUBLE, 1) // double $x
+    ZEND_ARG_TYPE_INFO(0, y, IS_LONG, 1) // int $y = 5
+    ZEND_ARG_TYPE_INFO(0, allow_zero, IS_BOOL, 1) // boolean $allow_zero = false
 ZEND_END_ARG_INFO();
 
 /* Register functions */
@@ -66,7 +66,7 @@ zend_module_entry koda_sandbox_module_entry = {
     NULL,  // on start request callback
     NULL,  // on end request callback
     PHP_MINFO(koda_sandbox),  // info for phpinfo()
-    "0.2-7-g51a2c7f",  // module version
+    "0.2-8-g028935b",  // module version
     STANDARD_MODULE_PROPERTIES  // id, flags, ...
 };
 
@@ -98,7 +98,7 @@ PHP_MINFO_FUNCTION(koda_sandbox) {
 
     php_info_print_table_start();
     php_info_print_table_header(2, "koda/sandbox support", "enabled");
-    php_info_print_table_header(2, "koda/sandbox version", "0.2-7-g51a2c7f");
+    php_info_print_table_header(2, "koda/sandbox version", "0.2-8-g028935b");
     php_info_print_table_header(2, "koda/sandbox with Koda", "0.1");
 #ifdef KODA_SANDBOX_DEBUG
     php_info_print_table_header(2, "koda/sandbox with debug", "yes");
