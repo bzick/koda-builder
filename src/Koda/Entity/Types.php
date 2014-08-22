@@ -60,6 +60,19 @@ class Types {
         self::CALLBACK => "callable",
     ];
 
+    public static $ctypes = [
+        self::MIXED => "zval",
+        self::BOOLEAN => "short",
+        self::INT => "long",
+        self::DOUBLE => "double",
+        self::STRING => "char",
+        self::ARR => "zval",
+        self::OBJECT => "zval",
+        self::RESOURCE => "zval",
+        self::NIL => "zval",
+        self::CALLBACK => "zval",
+    ];
+
     public static $complex = [
         self::MIXED    => true,
         self::BOOLEAN  => false,

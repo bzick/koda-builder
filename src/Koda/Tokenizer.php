@@ -87,20 +87,11 @@ class Tokenizer
      */
     public static $macros = array(
         self::MACRO_STRING  => array(
-            \T_ABSTRACT      => 1, \T_ARRAY         => 1, \T_AS            => 1,
-            \T_BREAK         => 1, \T_BREAK         => 1, \T_CASE          => 1,
-            \T_CATCH         => 1, \T_CLASS         => 1, \T_CLASS_C       => 1,
-            \T_CLONE         => 1,
-            \T_CONST         => 1,
-            \T_CONTINUE      => 1,
-            \T_DECLARE       => 1,
-            \T_DEFAULT       => 1,
-            \T_DIR           => 1,
-            \T_DO            => 1,
-            \T_ECHO          => 1,
-            \T_ELSE          => 1,
-            \T_ELSEIF        => 1,
-            \T_EMPTY         => 1,
+            \T_ABSTRACT      => 1, \T_ARRAY         => 1, \T_AS            => 1, \T_BREAK         => 1,
+            \T_BREAK         => 1, \T_CASE          => 1, \T_CATCH         => 1, \T_CLASS         => 1,
+            \T_CLASS_C       => 1, \T_CLONE         => 1, \T_CONST         => 1, \T_CONTINUE      => 1,
+            \T_DECLARE       => 1, \T_DEFAULT       => 1, \T_DIR           => 1, \T_DO            => 1,
+            \T_ECHO          => 1, \T_ELSE          => 1, \T_ELSEIF        => 1, \T_EMPTY         => 1,
             \T_ENDDECLARE    => 1,
             \T_ENDFOR        => 1,
             \T_ENDFOREACH    => 1,
@@ -261,7 +252,7 @@ class Tokenizer
      * @var array
      */
     private static $spec = array(
-        'true' => 1, 'false' => 1, 'null' => 1, 'TRUE' => 1, 'FALSE' => 1, 'NULL' => 1
+        'true' => 1, 'false' => 1, 'null' => 1
     );
 
     /**
@@ -638,6 +629,12 @@ class Tokenizer
         }
     }
 
+//    public function sliceTo($token) {
+//        for() {
+//
+//        }
+//    }
+
     /**
      * Get tokens near current position
      * @param int $before count tokens before current token
@@ -702,7 +699,7 @@ class Tokenizer
      */
     public function isSpecialVal()
     {
-        return isset(self::$spec[$this->current()]);
+        return isset(self::$spec[strtolower($this->current())]);
     }
 
     /**

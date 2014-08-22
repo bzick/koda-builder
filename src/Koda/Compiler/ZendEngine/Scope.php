@@ -15,104 +15,148 @@ class Scope {
      */
     public $function;
 
-	public $vars = [];
+    /**
+     * @var Zval[]
+     */
+    public $vars = [];
+
+    public $reads = 0;
+    public $writes = 0;
 
     public function __construct(EntityFunction $function) {
         $this->function = $function;
-	    foreach($function->arguments as $arg) {
-
-	    }
+        foreach($this->function->arguments as $argument) {
+            $this->vars[$argument->name] = (new Zval($this, $argument->name))->setArgument($argument);
+        }
     }
 
     public function convert() {
         if(!$this->function->tokens) { // empty body
             return "";
         }
+
+        $code = [];
         $tokens = $this->function->tokens;
         while($tokens->valid()) {
             if($tokens->is(Tokenizer::MACRO_STRING)) {
                 $stmt = $tokens->getStmtName();
-                $this->{"parse$stmt"}($tokens);
+                $code[] = $this->{"parse$stmt"}($tokens);
             } else {
-                $this->parseExpression($tokens);
+                $code[] = $this->parseExpression($tokens);
             }
         }
-        return "";
+        return implode("\n\t", $code);
 //        return $this->statments($this->function->stmts);
     }
 
-	/**
-	 * @param array $stmts
-	 * @return string
-	 */
-	public function statements(array $stmts) {
-		$lines = [];
-		foreach($stmts as $stmt) {
-			/* @var \PhpParser\Node $stmt */
-			$method = str_replace('_', '', $stmt->getType());
-			$code = $this->$method($stmt);
-			if(is_array($code)) {
-				foreach($code as $item) {
-					$lines[] = $item;
-				}
-			} else {
-				$lines[] = $code;
-			}
-		}
-
-		return  implode("\n    ", $lines);
-	}
-
-	/**
-	 * @param mixed $expr
-	 * @param string $name
-	 * @throws \RuntimeException
-	 * @return \Koda\Compiler\ZendEngine\Zval
-	 */
-	public function zval($expr, $name = null) {
-		$var = new Zval($this);
-		if($name) {
-			$this->vars[$name] = $var;
-		}
-		if($expr instanceof Scalar) {
-			$var->setScalar($expr->value);
-		} elseif($expr instanceof Expr) {
-//			$code = $this->expr();
-//		} else {
-			drop($expr);
-			throw new \RuntimeException("unsupported expr: ".$expr->getType());
-		}
-
-		return $var;
-	}
-
-
-	public function exprUnaryMinus(Expr $expr) {
-		if($expr->expr instanceof Scalar) {
-			return $this->zval($expr->expr);
-		}
-	}
-
-    public function stmtReturn($value) {
-	    $return = $this->zval($value->expr, 'result');
-	    /** @var Zval $return */
-        if($return->isScalar()) {
-            switch($return->type) {
-	            case Types::BOOLEAN:
-					return $return->value ? "RETURN_TRUE;" : "RETURN_FALSE;";
-	            case Types::DOUBLE:
-		            return "RETURN_DOUBLE({$return->value});";
-	            case Types::INT:
-		            return "RETURN_LONG({$return->value});";
-	            case Types::NIL:
-		            return "RETURN_NULL();";
-	            case Types::STRING:
-		            return "RETURN_STRINGL(\"".addslashes($return->value)."\", ".strlen($return->value).");";
+    public function parseReturn(Tokenizer $tokens) {
+        if($tokens->valid()) {
+            $return = $this->parseExpression($tokens->next());
+            dump("$return");
+            if($return->isScalar()) {
+                switch($return->type) {
+                    case Types::BOOLEAN:
+                        return $return->value ? "RETURN_TRUE;" : "RETURN_FALSE;";
+                    case Types::DOUBLE:
+                        return "RETURN_DOUBLE({$return->value});";
+                    case Types::INT:
+                        return "RETURN_LONG({$return->value});";
+                    case Types::NIL:
+                        return "RETURN_NULL();";
+                    case Types::STRING:
+                        return "RETURN_STRINGL(\"".addslashes($return->value)."\", ".strlen($return->value).");";
+                    default:
+                        drop("unknown type ".Types::getTypeCode($return->type));
+                }
+            } else {
+                return "RETURN_ZVAL($return, 1);";
             }
         } else {
-            return "RETURN_ZVAL($value, 1);";
+            return "return;";
         }
     }
 
+    public function parseExpression(Tokenizer $tokens) {
+        $op   = false; // last exp was operator
+        $cond = false; // was comparison operator
+        $return = $this->parseTerm($tokens);
+        while($tokens->valid()) {
+            if($tokens->is(';')) {
+                $tokens->next();
+                return $return;
+            } elseif ($tokens->is(Tokenizer::MACRO_BINARY)) { // binary operator: $a + $b, $a <= $b, ...
+                if ($tokens->is(Tokenizer::MACRO_COND)) { // comparison operator
+                    if ($cond) {
+                        break;
+                    }
+                    $cond = true;
+                } elseif ($tokens->is(Tokenizer::MACRO_BOOLEAN)) {
+                    $cond = false;
+                }
+                $op = $tokens->getAndNext();
+            }
+            if($op) {
+                $zval = $this->parseTerm($tokens);
+                $return->op($op, $zval);
+            }
+        }
+
+
+        return $return;
+    }
+
+    public function parseTerm(Tokenizer $tokens) {
+        $zval = new Zval($this);
+        if ($tokens->is(Tokenizer::MACRO_UNARY)) {
+            $unary = $tokens->getAndNext();
+        } else {
+            $unary = "";
+        }
+        if ($tokens->is(T_LNUMBER, T_DNUMBER)) {
+            return $zval->setScalar($tokens->getAndNext() * intval($unary."1"));
+        } elseif($tokens->is(T_CONSTANT_ENCAPSED_STRING)) {
+            $string = $tokens->getAndNext();
+            if($string{0} == '"') {
+                $string = substr($string, 1, -1);
+            } else {
+                $string = addslashes(substr($string, 1, -1));
+            }
+            return $zval->setScalar($string);
+        } elseif($tokens->is(T_STRING)) {
+            if($tokens->isSpecialVal()) {
+                return $zval->setScalar(json_decode(strtolower($tokens->getAndNext())));
+            } else {
+                throw new \RuntimeException("callback or constant: ".$tokens->current());
+            }
+        } elseif($tokens->is(T_VARIABLE)) {
+            return $this->parseVariable($tokens);
+        } else {
+            throw new \RuntimeException("Another tokens not ready yet: ".$tokens->current());
+        }
+    }
+
+    public function parseVariable(Tokenizer $tokens) {
+        $name = substr($tokens->getAndNext(), 1);
+        if($tokens->is(T_OBJECT_OPERATOR, T_DOUBLE_COLON)) {
+            drop("parse object");
+        } elseif($tokens->is('[')) {
+            drop("parse array");
+        } elseif($tokens->is('(')) {
+            drop("parse call");
+        } else {
+            return $this->variable($name);
+        }
+    }
+
+    public function variable($name) {
+        if(isset($this->vars[$name])) {
+            $this->reads++;
+            return $this->vars[$name];
+        } else {
+            $zval = new Zval($this);
+            $this->vars[$name] = $zval;
+            return $zval;
+        }
+    }
 
 }

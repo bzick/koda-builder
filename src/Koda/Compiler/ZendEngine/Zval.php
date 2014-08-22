@@ -3,6 +3,7 @@
 namespace Koda\Compiler\ZendEngine;
 
 
+use Koda\Entity\EntityArgument;
 use Koda\Entity\Types;
 
 class Zval {
@@ -26,8 +27,9 @@ class Zval {
 //		return $val;
 //	}
 
-	public function __construct(Scope $scope) {
+	public function __construct(Scope $scope, $name = null) {
 		$this->scope = $scope;
+		$this->name = $name;
 	}
 
 	public function setScalar($value) {
@@ -39,6 +41,29 @@ class Zval {
 		return $this;
 	}
 
+    public function setArgument(EntityArgument $argument) {
+        if($argument->is_complex) {
+            $this->is_var = true;
+        } else {
+            $this->is_var = false;
+        }
+        $this->type = $argument->cast;
+        if($argument->is_optional) {
+            $this->value = $argument->value;
+        }
+        return $this;
+    }
+
+    public function define() {
+        if($this->is_var) {
+            return "zval *{$this->name} = NULL";
+        } elseif($this->type == Types::STRING) {
+            return "char *{$this->name} = NULL;\nlong {$this->name}_len = 0;";
+        } else {
+            return Types::$ctypes[$this->type]." {$this->name};";
+        }
+    }
+
 	public function setDynamic() {
 
 	}
@@ -46,6 +71,10 @@ class Zval {
 	public function toInt() {
 
 	}
+
+    public function __toString() {
+        return "".$this->name;
+    }
 
 	public function toNumber() {
 		if($this->type != Types::INT && $this->type != Types::DOUBLE) {
@@ -67,13 +96,11 @@ class Zval {
 		}
 	}
 
-	private function _initZval() {
-		switch($this->type) {
-
-		}
-	}
-
 	public function isScalar() {
-		return $this->is_const;
+		return !$this->is_var;
 	}
+
+    public function op($op_code, $zval) {
+
+    }
 }

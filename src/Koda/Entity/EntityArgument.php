@@ -13,6 +13,7 @@ class EntityArgument extends EntityAbstract {
     public $position;
     public $instance_of;
     public $allows_null;
+    public $is_complex = false;
     /**
      * @var int
      */
@@ -83,6 +84,7 @@ class EntityArgument extends EntityAbstract {
      * @param string $hint
      */
     public function setCast($type, $hint = null) {
+        $this->is_complex = isset(Types::$complex[$type]);
         $this->cast = $type;
         if($type == Types::OBJECT) {
             $this->instance_of = $hint;

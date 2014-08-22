@@ -10,7 +10,7 @@ BEGIN_EXTERN_C();
 
 /* proto function Returns::returnInt():void  [public] */
 PHP_METHOD(Koda_Sandbox_Returns, returnInt) {
-    
+    RETURN_LONG(5);
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_returnInt, 0, 0, 0)
@@ -19,7 +19,7 @@ ZEND_END_ARG_INFO();
 
 /* proto function Returns::returnDouble():void  [public] */
 PHP_METHOD(Koda_Sandbox_Returns, returnDouble) {
-    
+    RETURN_DOUBLE(5.5);
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_returnDouble, 0, 0, 0)
@@ -28,7 +28,7 @@ ZEND_END_ARG_INFO();
 
 /* proto function Returns::returnNegative():void  [public] */
 PHP_METHOD(Koda_Sandbox_Returns, returnNegative) {
-    
+    RETURN_LONG(-5);
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_returnNegative, 0, 0, 0)
@@ -37,7 +37,7 @@ ZEND_END_ARG_INFO();
 
 /* proto function Returns::returnString():void  [public] */
 PHP_METHOD(Koda_Sandbox_Returns, returnString) {
-    
+    RETURN_STRINGL("some string", 11);
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_returnString, 0, 0, 0)
@@ -46,7 +46,7 @@ ZEND_END_ARG_INFO();
 
 /* proto function Returns::returnTrue():void  [public] */
 PHP_METHOD(Koda_Sandbox_Returns, returnTrue) {
-    
+    RETURN_TRUE;
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_returnTrue, 0, 0, 0)
@@ -55,7 +55,7 @@ ZEND_END_ARG_INFO();
 
 /* proto function Returns::returnFalse():void  [public] */
 PHP_METHOD(Koda_Sandbox_Returns, returnFalse) {
-    
+    RETURN_FALSE;
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_returnFalse, 0, 0, 0)
@@ -64,7 +64,7 @@ ZEND_END_ARG_INFO();
 
 /* proto function Returns::returnNULL():void  [public] */
 PHP_METHOD(Koda_Sandbox_Returns, returnNULL) {
-    
+    RETURN_NULL();
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_returnNULL, 0, 0, 0)

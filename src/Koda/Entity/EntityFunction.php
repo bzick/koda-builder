@@ -79,8 +79,8 @@ class EntityFunction extends EntityAbstract {
     public function setBody($body) {
         $body = trim($body);
         if($body) {
-            $this->body = $body;
-            $this->tokens = new Tokenizer($body);
+//            $this->body = $body;
+            $this->tokens = new Tokenizer('<?php '.$body);
 //            $parser = new Parser(new Lexer);
 //            $this->stmts = $parser->parse('<?php '.$this->body);
         }

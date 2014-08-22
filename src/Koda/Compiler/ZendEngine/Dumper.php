@@ -226,10 +226,18 @@ HEADER;
                 }
                 $scope = new Scope($function);
                 $body = $scope->convert();
+                $vars = [];
+                foreach($scope->vars as $var) {
+                    $vars[] = $var->define();
+                }
+                $vars = implode("\n", $vars);
+                $arguments = "";
                 echo <<<DEFINE_FUNTION
 
 /* proto {$function->dump()} */
 PHP_FUNCTION({$function->short}) {
+    {$vars}
+    {$arguments}
     {$body}
 }
 

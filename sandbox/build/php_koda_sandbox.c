@@ -19,6 +19,9 @@ BEGIN_EXTERN_C();
 
 /* proto function Koda\Sandbox\simple_multi(double $x, int $y = 5):boolean */
 PHP_FUNCTION(simple_multi) {
+    zval *x = NULL
+zval *y = NULL
+    
     
 }
 
@@ -29,6 +32,10 @@ ZEND_END_ARG_INFO();
 
 /* proto function KodaSandbox\simple_div(double $x, int $y = 5, boolean $allow_zero = false):boolean */
 PHP_FUNCTION(simple_div) {
+    zval *x = NULL
+zval *y = NULL
+zval *allow_zero = NULL
+    
     
 }
 
@@ -66,7 +73,7 @@ zend_module_entry koda_sandbox_module_entry = {
     NULL,  // on start request callback
     NULL,  // on end request callback
     PHP_MINFO(koda_sandbox),  // info for phpinfo()
-    "0.2-8-g028935b",  // module version
+    "0.2-9-g43d8943",  // module version
     STANDARD_MODULE_PROPERTIES  // id, flags, ...
 };
 
@@ -98,7 +105,7 @@ PHP_MINFO_FUNCTION(koda_sandbox) {
 
     php_info_print_table_start();
     php_info_print_table_header(2, "koda/sandbox support", "enabled");
-    php_info_print_table_header(2, "koda/sandbox version", "0.2-8-g028935b");
+    php_info_print_table_header(2, "koda/sandbox version", "0.2-9-g43d8943");
     php_info_print_table_header(2, "koda/sandbox with Koda", "0.1");
 #ifdef KODA_SANDBOX_DEBUG
     php_info_print_table_header(2, "koda/sandbox with debug", "yes");
