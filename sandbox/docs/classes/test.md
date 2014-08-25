@@ -1,4 +1,4 @@
-Class Koda\Sandbox\Names
+Class `Koda\Sandbox\Names`
 ========================
 
 Parent: [ArrayObject](#xxx)
